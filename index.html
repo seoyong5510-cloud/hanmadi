@@ -148,6 +148,21 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .ok .cta{background:var(--ok)}
 .fb .txt{justify-self:center}
 
+/* motion */
+@keyframes up{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+@keyframes pop{0%{transform:scale(.6)}60%{transform:scale(1.12)}100%{transform:scale(1)}}
+@keyframes shake{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+.fb{animation:up .22s ease-out}
+.opt.ok,.week .did.now i{animation:pop .3s ease-out}
+.opt.no,.dock.no .words{animation:shake .3s}
+.micbtn:active{transform:scale(.94)}
+.fin h1,.fin .rows{animation:up .35s ease-out both}
+.fin .rows{animation-delay:.12s}
+#confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:5}
+.setrow{display:flex;justify-content:space-between;align-items:center;width:100%;padding:16px 0;margin-top:22px;border-top:1px solid var(--line);font-size:17px;font-weight:600}
+.setrow b{color:var(--brand);font-weight:700}
+@media (prefers-reduced-motion:reduce){.fb,.opt,.week i,.dock .words,.fin h1,.fin .rows{animation:none !important}}
+
 /* finish */
 .fin{padding-top:56px}
 .fin h1{font-size:30px;font-weight:800;line-height:1.3;letter-spacing:-.02em}
@@ -302,7 +317,7 @@ const KEY="hanmadi-progress";
 const dayStr=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 const today=()=>dayStr(new Date());
 const plusDays=n=>{const d=new Date();d.setDate(d.getDate()+n);return dayStr(d);};
-let P={done:{},days:{},cards:{}};
+let P={done:{},days:{},cards:{},snd:true};
 function load(){
   try{
     const o=JSON.parse(localStorage.getItem(KEY)||"{}")||{};
@@ -310,6 +325,7 @@ function load(){
     P.days=Object.assign({},o.days||{});
     P.cards=Object.assign({},o.cards||{});
     if(!o.days&&o.lastDay)P.days[o.lastDay]=Number(o.count)||1;
+    P.snd=o.snd!==false;
   }catch(e){}
   Object.keys(P.done).forEach(id=>{if(LMAP[id])addCards(LMAP[id],today());});
 }
@@ -343,6 +359,45 @@ function speak(text,rate){
   try{const u=new SpeechSynthesisUtterance(text);u.lang="en-US";u.rate=rate||0.9;speechSynthesis.cancel();speechSynthesis.speak(u);}catch(e){}
 }
 function stopMic(){if(rec){try{rec.abort();}catch(e){}rec=null;}}
+
+/* ---------- sound effects ---------- */
+let AC=null;
+function note(f,at,dur,type,vol){
+  const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime+at;
+  o.type=type||"sine";o.frequency.setValueAtTime(f,t);
+  g.gain.setValueAtTime(0.0001,t);
+  g.gain.exponentialRampToValueAtTime(vol||0.18,t+0.015);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+dur+0.02);
+}
+function sfx(name){
+  if(!P.snd)return;
+  try{
+    const C=window.AudioContext||window.webkitAudioContext;
+    if(!C)return;
+    AC=AC||new C();
+    if(AC.state==="suspended")AC.resume();
+    if(name==="tap")note(520,0,0.06,"sine",0.08);
+    else if(name==="ok"){note(659,0,0.14,"triangle");note(988,0.1,0.26,"triangle");}
+    else if(name==="perfect"){note(659,0,0.12,"triangle");note(831,0.09,0.12,"triangle");note(1319,0.18,0.34,"triangle");}
+    else if(name==="no"){note(233,0,0.16,"sine",0.2);note(185,0.13,0.26,"sine",0.2);}
+    else if(name==="done"){[523,659,784,1047].forEach((f,i)=>note(f,i*0.11,0.22,"triangle"));[523,659,784,1047].forEach(f=>note(f,0.5,0.7,"sine",0.1));}
+  }catch(e){}
+}
+document.addEventListener("click",e=>{if(e.target.closest&&e.target.closest(".cta,.row,.tabs button,.aud,.setrow"))sfx("tap");});
+function confetti(){
+  if(window.matchMedia&&matchMedia("(prefers-reduced-motion:reduce)").matches)return;
+  const c=document.createElement("canvas");c.id="confetti";document.body.appendChild(c);
+  const x=c.getContext("2d"),W=c.width=innerWidth,H=c.height=innerHeight;
+  const cols=["#2f6bff","#00a86b","#ffcf33","#f04452","#8f6bff"];
+  const ps=[];for(let i=0;i<90;i++)ps.push({x:Math.random()*W,y:-20-Math.random()*H*0.5,vx:(Math.random()-0.5)*3,vy:3+Math.random()*4,s:5+Math.random()*6,r:Math.random()*6,vr:(Math.random()-0.5)*0.3,c:cols[i%cols.length]});
+  const t0=performance.now();
+  (function tick(now){
+    x.clearRect(0,0,W,H);
+    ps.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;x.save();x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.c;x.fillRect(-p.s/2,-p.s/4,p.s,p.s/2);x.restore();});
+    if(now-t0<2600)requestAnimationFrame(tick);else c.remove();
+  })(t0);
+}
 
 /* ---------- grading ---------- */
 const FIX={"i'm":"i am","im":"i am","i'll":"i will","it's":"it is","its":"it is","don't":"do not","dont":"do not","how's":"how is",
@@ -427,8 +482,10 @@ function viewStats(){
    +'<div class="three"><div><b>'+keys.length+'</b><span>배운 문장</span></div><div><b>'+(keys.length-mine)+'</b><span>익히는 중</span></div><div><b>'+mine+'</b><span>내 것이 된 문장</span></div></div>'
    +'<h2 class="sec">최근 7일 동안 말한 횟수</h2><ol class="bars">'
    +days.map(x=>'<li class="'+(x.now?"now":"")+'"><span>'+x.n+'</span><span class="col" style="height:'+Math.round(x.n/mx*100)+'%"></span><span>'+x.d+'</span></li>').join("")+'</ol>'
-   +'<p class="note">배운 문장은 1일, 2일, 4일, 7일, 15일 뒤에 다시 물어봐요. 힌트 없이 네 번 연달아 맞히면 내 것이 된 문장으로 넘어가요. 기록은 이 휴대폰에 저장돼요.</p>';
+   +'<p class="note">배운 문장은 1일, 2일, 4일, 7일, 15일 뒤에 다시 물어봐요. 힌트 없이 네 번 연달아 맞히면 내 것이 된 문장으로 넘어가요. 기록은 이 휴대폰에 저장돼요.</p>'
+   +'<button type="button" class="setrow" id="snd"><span>효과음</span><b>'+(P.snd?"켜짐":"꺼짐")+'</b></button>';
   chrome.innerHTML=tabsHtml();
+  $("#snd").addEventListener("click",()=>{P.snd=!P.snd;save();show();});
 }
 
 /* ---------- session ---------- */
@@ -506,11 +563,11 @@ function bindListen(ex){
   app.querySelectorAll(".opt").forEach(b=>b.addEventListener("click",()=>{
     if(b.textContent===ex.p.ko){
       app.querySelectorAll(".opt").forEach(o=>{o.disabled=true;});
-      b.classList.add("ok");
+      b.classList.add("ok");sfx("ok");
       dock.className="dock fixed ok";
       dock.innerHTML='<div class="fb"><p class="fb-t">맞아요</p><p class="words" lang="en">'+esc(ex.p.en)+'</p><p class="sub">'+esc(ex.p.say)+'</p><button type="button" class="cta" id="nx">다음</button></div>';
       $("#nx").addEventListener("click",next);
-    }else{b.classList.add("no");b.disabled=true;}
+    }else{b.classList.add("no");b.disabled=true;sfx("no");}
   }));
 }
 function dockMic(ex){
@@ -565,13 +622,15 @@ function answer(ex,text,alts){
     S.said++;P.days[today()]=(P.days[today()]||0)+1;
     if(ex.card)grow(ex.card,clean);
     save();
+    sfx(g.score===1?"perfect":"ok");
     try{navigator.vibrate&&navigator.vibrate(20);}catch(e){}
     reveal();
     dock.className="dock fixed ok";
     dock.innerHTML='<div class="fb"><p class="fb-t">'+(g.score===1?"정확해요":"좋아요, 통해요")+'</p><p class="words" lang="en">'+words+'</p><button type="button" class="cta" id="nx">다음</button></div>';
     $("#nx").addEventListener("click",next);
   }else{
-    S.first=false;S.fails++;
+    S.first=false;S.fails++;sfx("no");
+    try{navigator.vibrate&&navigator.vibrate([30,40,30]);}catch(e){}
     reveal();
     dock.className="dock fixed no";
     dock.innerHTML='<div class="fb"><p class="fb-t">조금만 더요</p><p class="words" lang="en">'+words+'</p><p class="sub">내가 한 말: '+esc(text)+'</p><button type="button" class="cta dark" id="re">다시 말하기</button>'
@@ -597,6 +656,7 @@ function finish(){
   const st=streak(),title=S.kind==="lesson"?esc(LMAP[S.id].title)+" 수업을 마쳤어요":"복습을 마쳤어요";
   app.innerHTML='<div class="fin"><h1>'+title+'</h1><ul class="rows"><li><span>방금 영어로 말한 횟수</span><b>'+S.said+'번</b></li><li><span>연속 학습</span><b>'+st+'일</b></li>'+extra+'</ul></div>';
   chrome.innerHTML='<div class="dock fixed"><button type="button" class="cta" id="home">확인</button></div>';
+  sfx("done");confetti();
   $("#home").addEventListener("click",()=>{tab="today";show();window.scrollTo(0,0);});
   S=null;
 }
