@@ -102,8 +102,8 @@ async function driveSession(page,mode){
   return await page.evaluate(async mode=>{
     const sleep=ms=>new Promise(r=>setTimeout(r,ms)),q=s=>document.querySelector(s),all=s=>[...document.querySelectorAll(s)];
     const seen=[];let guard=0,missed={};
-    const findWord=ko=>{for(const id of ["l","b","d","c","e","f"].flatMap(p=>[1,2,3,4,5,6,7,8,9,10].map(n=>p+n))){const l=window.__t.lesson(id);if(!l)continue;const w=l.words.find(w=>w.ko===ko);if(w)return w.w;}return null;};
-    const findKo=en=>{for(const id of ["l","b","d","c","e","f"].flatMap(p=>[1,2,3,4,5,6,7,8,9,10].map(n=>p+n))){const l=window.__t.lesson(id);if(!l)continue;const t=l.talk.find(t=>t.them===en);if(t)return t.ko;}return null;};
+    const findWord=ko=>{for(const id of ["l","m","b","d","c","e","f"].flatMap(p=>[1,2,3,4,5,6,7,8,9,10].map(n=>p+n))){const l=window.__t.lesson(id);if(!l)continue;const w=l.words.find(w=>w.ko===ko);if(w)return w.w;}return null;};
+    const findKo=en=>{for(const id of ["l","m","b","d","c","e","f"].flatMap(p=>[1,2,3,4,5,6,7,8,9,10].map(n=>p+n))){const l=window.__t.lesson(id);if(!l)continue;const t=l.talk.find(t=>t.them===en);if(t)return t.ko;}return null;};
     while(guard++<400){
       await sleep(25);
       if(q("#home"))return {done:true,seen};
