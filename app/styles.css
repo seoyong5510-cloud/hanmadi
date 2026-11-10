@@ -330,3 +330,12 @@ a.setrow{text-decoration:none;color:inherit}
 .micbtn.on~* #tstate,.micbtn.on + .side{}
 @media (prefers-color-scheme:dark){.feat{background:#1b2540}.feat-t{color:#f2f4f7}.feat-t span{color:#c0c7d4}}
 .msg.ai .txt.sm{margin-right:12px}
+/* grammar explanation */
+.gram{margin-top:14px;padding:14px 16px;border-radius:16px;background:color-mix(in srgb,var(--brand) 7%,var(--bg));font-size:15px;line-height:1.6;text-align:left}
+.gram b,.gram summary{display:block;font-size:12px;font-weight:800;color:var(--brand);letter-spacing:.02em;margin-bottom:4px}
+.gram summary{cursor:pointer;margin:0;list-style:none}
+.gram summary::-webkit-details-marker{display:none}
+.gram summary::after{content:" 보기 ▾"}
+.gram[open] summary::after{content:" 접기 ▴"}
+.gram[open] summary{margin-bottom:4px}
+details.gram{margin:8px 0 4px;padding:10px 14px}

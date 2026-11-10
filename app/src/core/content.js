@@ -1,9 +1,9 @@
 // Lesson content: loaded from JSON files per level and indexed by lesson id.
 import {LEVELS} from "./levels.js";
 import {P} from "./store.js";
-let BY={},UNITS={},LEVEL_OF={},META={};
+let BY={},UNITS={},LEVEL_OF={},META={},GRAM=null;
 export function initContent(byLevel){
-  BY={};UNITS={};LEVEL_OF={};META={};
+  BY={};UNITS={};LEVEL_OF={};META={};GRAM=null;
   LEVELS.forEach(lv=>{
     const d=byLevel[lv.id]||{units:[]};
     META[lv.id]={reviewed:!!d.reviewed};
@@ -25,6 +25,11 @@ export async function loadContent(base="content/"){
   initContent(out);
 }
 export const lesson=id=>BY[id]||null;
+// Grammar explanation for a lesson sentence, looked up by its English text ("" when there is none).
+export function gramFor(en){
+  if(!GRAM){GRAM={};Object.values(BY).forEach(l=>l.ph.forEach(p=>{if(p.gram)GRAM[p.en]=p.gram;}));}
+  return GRAM[en]||"";
+}
 export const unitsOf=lv=>UNITS[lv]||[];
 export const orderOf=lv=>unitsOf(lv).flatMap(u=>u.ids);
 export const levelOfLesson=id=>LEVEL_OF[id]||"a1";

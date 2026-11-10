@@ -1,7 +1,7 @@
 // Lesson and review sessions: a queue of exercises shown one screen at a time.
 import {P,save,addSay,addSecs} from "../core/store.js";
 import {LV} from "../core/levels.js";
-import {lesson,cardData,cardLevel} from "../core/content.js";
+import {lesson,cardData,cardLevel,gramFor} from "../core/content.js";
 import {gradeBest,gradeFrame,tipsFor} from "../core/grade.js";
 import {grow,addCards,dueKeys,streak} from "../core/srs.js";
 import {today,plusDays,shuffle,esc} from "../core/util.js";
@@ -71,7 +71,9 @@ function endClock(){
 
 /* ---------- pieces of markup ---------- */
 const auds=en=>canSpeak()?'<div class="auds"><button type="button" class="aud" data-say="'+esc(en)+'" data-rate="0">'+I.spk+'듣기</button><button type="button" class="aud" data-say="'+esc(en)+'" data-rate="0.65">천천히</button></div>':"";
-const hidden=(p,label,withKo)=>'<button type="button" class="txt hintb" id="hint">'+(label||"힌트 보기")+'</button><div class="ans" id="ans" hidden><p class="en" lang="en">'+esc(p.en)+'</p>'+(M().say&&p.say?'<p class="say">'+esc(p.say)+'</p>':"")+(withKo?'<p class="ko">'+esc(p.ko)+'</p>':"")+(p.note?'<p class="why">'+esc(p.note)+'</p>':"")+auds(p.en)+'</div>';
+const hidden=(p,label,withKo)=>'<button type="button" class="txt hintb" id="hint">'+(label||"힌트 보기")+'</button><div class="ans" id="ans" hidden><p class="en" lang="en">'+esc(p.en)+'</p>'+(M().say&&p.say?'<p class="say">'+esc(p.say)+'</p>':"")+(withKo?'<p class="ko">'+esc(p.ko)+'</p>':"")+(p.note?'<p class="why">'+esc(p.note)+'</p>':"")+gramH(p.en)+auds(p.en)+'</div>';
+// Grammar box: always open on the study screen, folded in the answer panel.
+const gramH=(en,fold)=>{const g=gramFor(en);return !g?"":fold?'<details class="gram"><summary>문법 설명</summary><p>'+esc(g)+'</p></details>':'<div class="gram"><b>문법</b><p>'+esc(g)+'</p></div>';};
 const picH=e=>e?'<div class="pic" aria-hidden="true">'+e+'</div>':"";
 const playB=en=>'<button type="button" class="bigplay" data-say="'+esc(en)+'" data-rate="0" aria-label="다시 듣기">'+I.spkL+'</button>';
 const optsH=(ex,en)=>'<div class="opts" style="margin-top:24px">'+ex.opts.map(o=>'<button type="button" class="opt"'+(en?' lang="en"':"")+'>'+esc(o)+'</button>').join("")+'</div>';
@@ -93,7 +95,7 @@ function showEx(){
      +'<div class="ans"><p class="why" style="margin:0"><b>'+esc(l.grammar.point)+'</b></p><p class="ko">'+esc(l.grammar.note)+'</p></div>';
   }else if(ex.t==="learn"){
     if(M().blind&&canSpeak())m='<p class="inst">먼저 듣고, 들은 대로 말해요</p>'+playB(p.en)+hidden(p,"문장 보기",true);
-    else m='<p class="inst">듣고 따라 말해요</p>'+picH(p.e)+'<h1 class="en" lang="en">'+esc(p.en)+'</h1>'+(M().say&&p.say?'<p class="say">'+esc(p.say)+'</p>':"")+'<p class="ko">'+esc(p.ko)+'</p>'+(p.note?'<p class="why">'+esc(p.note)+'</p>':"")+auds(p.en)+tipsHtml(p.en);
+    else m='<p class="inst">듣고 따라 말해요</p>'+picH(p.e)+'<h1 class="en" lang="en">'+esc(p.en)+'</h1>'+(M().say&&p.say?'<p class="say">'+esc(p.say)+'</p>':"")+'<p class="ko">'+esc(p.ko)+'</p>'+(p.note?'<p class="why">'+esc(p.note)+'</p>':"")+gramH(p.en)+auds(p.en)+tipsHtml(p.en);
     auto=p.en;
   }else if(ex.t==="pic"){
     m='<p class="inst">뜻에 맞는 영어 단어를 골라요</p>'+picH(ex.wd.e)+'<h1 class="koq">'+esc(ex.wd.ko)+'</h1>'+optsH(ex,true);
@@ -264,6 +266,7 @@ async function answer(ex,text,alts,conf){
     dock.innerHTML='<div class="fb" role="status"><p class="fb-t">'+(isFree?"좋아요, 내 문장이에요":viaAi?"뜻이 통해요":perfect?"정확해요":"좋아요, 통해요")+'</p>'
      +(viaAi?'<p class="words" lang="en">'+esc(text)+'</p><p class="sub">'+esc(judged.why_ko)+(judged.fix?' 더 자연스럽게: <span lang="en">'+esc(judged.fix)+'</span>':"")+'</p><p class="sub">교재 표현: <span lang="en">'+esc(ex.en)+'</span></p>'
             :'<p class="words" lang="en">'+(isFree?esc(g.heard):marks)+'</p>'+clear)
+     +(isFree?"":gramH(ex.en,true))
      +'<button type="button" class="cta" id="nx">다음</button>'+tool+'</div>';
     $("#nx").addEventListener("click",next);
   }else{
@@ -275,6 +278,7 @@ async function answer(ex,text,alts,conf){
     dock.innerHTML='<div class="fb" role="status"><p class="fb-t">'+title+'</p><p class="words" lang="en">'+marks+'</p><p class="sub">내가 한 말: '+esc(text)+'</p>'
      +(judged&&judged.why_ko?'<p class="tip">'+esc(judged.why_ko)+'</p>':"")
      +(isFree?"":tipsFor(g.words.filter(w=>!w.hit).map(w=>w.text),1).map(x=>'<p class="tip"><b lang="en">'+esc(x.w)+'</b>의 '+x.k.toUpperCase()+' 소리: '+x.t+'</p>').join(""))
+     +(isFree?"":gramH(ex.en,true))
      +'<button type="button" class="cta dark" id="re">다시 말하기</button>'+tool
      +(S.fails>=2?'<button type="button" class="txt" id="skip">건너뛰기</button>':"")+'</div>';
     $("#re").addEventListener("click",()=>dockMic(ex));

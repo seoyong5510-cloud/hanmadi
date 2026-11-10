@@ -179,6 +179,9 @@ try{
   await page.click('.rows [data-lesson="l2"]');
   ok("lesson opens with its goal and grammar point",(await txt(page,".inst")).includes("이번 수업")&&(await txt(page,".ans")).length>10);
   await page.screenshot({path:SHOTS+"/05-lesson-intro.png"});
+  await page.click("#nx");await page.waitForSelector("h1.en");
+  ok("study screen explains the grammar of the sentence",(await txt(page,".gram")).includes("from")&&(await txt(page,".gram")).includes("전치사"),await txt(page,".gram"));
+  await page.screenshot({path:SHOTS+"/05b-grammar.png"});
   await page.evaluate(()=>{window.__frame=()=>"I like fishing";});
   let r=await driveSession(page,"badfirst");
   ok("A1 lesson completes with wrong-then-right answers",r.done===true,JSON.stringify(r).slice(0,300));

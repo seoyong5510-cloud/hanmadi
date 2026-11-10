@@ -22,6 +22,7 @@ test("every lesson has the full teaching data",()=>{
     assert.equal(l.ph.length,4,T);
     for(const p of l.ph){
       assert.ok(p.en&&p.ko&&p.note,`${T} sentence fields`);
+      assert.ok(p.gram&&p.gram.length>=15&&/[가-힣]/.test(p.gram),`${T} grammar explanation for "${p.en}"`);
       assert.ok(p.alt.length>=1,`${T}: "${p.en}" needs an alternative`);
       for(const a of p.alt)assert.notEqual(norm(a),norm(p.en),`${T}: alt equals original`);
       assert.ok(!/[0-9]/.test(p.en),`${T}: digits in "${p.en}"`);
