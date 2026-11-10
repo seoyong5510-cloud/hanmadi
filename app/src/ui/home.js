@@ -1,6 +1,6 @@
 // Tab screens (today, lessons, stats, settings) and first-launch screens (welcome, level test).
 import {P,save,exportData,importData} from "../core/store.js";
-export const VERSION="2026.11.11-2";
+export const VERSION="2026.11.11-3";
 import {LEVELS,LV,levelIndex} from "../core/levels.js";
 import {unitsOf,orderOf,lesson,reviewed} from "../core/content.js";
 import {plan,stats,nextLesson} from "../core/plan.js";
@@ -26,6 +26,7 @@ function root(){
   bindTabs();
   $$("[data-lesson]").forEach(b=>b.addEventListener("click",()=>open("lesson",b.dataset.lesson)));
   $$("[data-review]").forEach(b=>b.addEventListener("click",()=>open("review")));
+  $$("[data-ears]").forEach(b=>b.addEventListener("click",()=>open("ears")));
   $$("[data-setlv]").forEach(b=>b.addEventListener("click",()=>setLevel(b.dataset.setlv)));
   $$("[data-goto]").forEach(b=>b.addEventListener("click",()=>show(b.dataset.goto)));
   bindSay(app);
@@ -54,7 +55,7 @@ function viewToday(){
    +'<div class="goal" role="img" aria-label="오늘 목표 '+pl.said+' / '+pl.goal+' 문장"><div class="goalbar"><i style="width:'+pl.pct+'%"></i></div><span>오늘 말한 문장 <b>'+pl.said+'</b> / '+pl.goal+'</span></div>'
    +'<ol class="week" aria-label="이번 주 연습한 날">'+week+'</ol>'
    +(nl&&!pl.due?'<button type="button" class="feat" data-lesson="'+nl.id+'">'+art(nl.id,"",nl.e)+'<span class="feat-t"><small>다음 수업</small><b>'+esc(nl.title)+'</b><span>'+esc(nl.goal)+'</span></span></button>':"")
-   +'<h2 class="sec">오늘의 학습</h2><ul class="rows">'+rows+'</ul>'
+   +'<h2 class="sec">오늘의 학습</h2><ul class="rows">'+rows+'</ul><h2 class="sec">귀 훈련</h2><ul class="rows"><li><button type="button" class="row" data-ears><span class="ic">'+I.spk+'</span><span class="tx"><b>발음 구별 듣기</b><small>L과 R, F와 P처럼 헷갈리는 소리 10문제 · 약 2분</small></span>'+I.go+'</button></li></ul>'
    +(s?'<h2 class="sec">오늘의 문장</h2><div class="quote"><p class="q-en" lang="en">'+esc(s.en)+'</p><p class="q-ko">'+esc(s.ko)+'</p>'+(canSpeak()?'<button type="button" class="aud" data-say="'+esc(s.en)+'">'+I.spk+'듣기</button>':"")+'</div>':"")
    +(w?'<h2 class="sec">오늘의 단어</h2><div class="quote wordq"><span class="pic sm" aria-hidden="true">'+w.e+'</span><div><p class="q-en" lang="en">'+esc(w.w)+'</p><p class="q-ko">'+esc(w.ko)+(w.ex?' · <span lang="en">'+esc(w.ex)+'</span>':"")+'</p></div></div>':"")
    +(pl.weak?'<h2 class="sec">요즘 자주 틀리는 것</h2><div class="quote"><p class="q-en">'+esc(pl.weak.name)+'</p><p class="q-ko">AI 회화에서 '+pl.weak.n+'번 고쳤어요. 복습에 자동으로 넣어 두었어요.</p></div>':"")

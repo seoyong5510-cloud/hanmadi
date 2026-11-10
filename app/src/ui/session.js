@@ -11,7 +11,7 @@ import {canRecord,startRecording} from "../speech/wav.js";
 import {sfx,confetti} from "../speech/sfx.js";
 import {llmReady,speechReady,call} from "../ai/relay.js";
 import {I,art} from "./icons.js";
-import {app,chrome,$,$$,register,show,open,enter,onLeave,fit} from "./nav.js";
+import {app,chrome,$,$$,ui,register,show,open,enter,onLeave,fit} from "./nav.js";
 import {openPron} from "./pronui.js";
 
 let S=null;
@@ -54,6 +54,10 @@ function startLesson(id){
   Object.keys(P.cards).filter(k=>k.split(":")[0]!==id&&!k.includes(":w")&&cardData(k))
     .sort((a,b)=>P.cards[a].due<P.cards[b].due?-1:P.cards[a].due>P.cards[b].due?1:0).slice(0,2)
     .forEach(k=>{const p=cardData(k);q.push({t:"recall",p,en:p.en,card:k,old:true});});
+  if(l.listen&&canSpeak()){
+    q.push({t:"hear",l});
+    l.listen.qs.forEach(x=>q.push({t:"quiz",koq:x.q,ans:x.o[0],opts:shuffle(x.o),fbA:"",fbB:x.why}));
+  }
   l.talk.forEach(tk=>q.push({t:"talk",tk,p:l.ph[tk.you],en:l.ph[tk.you].en,l}));
   // last round: every new sentence once more from memory, so each one is retrieved several times
   // with other work in between (repeated spaced retrieval is what makes it stick)
@@ -129,6 +133,15 @@ function showEx(){
   }else if(ex.t==="listen"){
     m='<p class="inst">잘 듣고 뜻을 골라요</p>'+playB(ex.say)+optsH(ex,false);
     auto=ex.say;
+  }else if(ex.t==="hear"){
+    m='<p class="inst">새 대화를 듣고 내용을 이해해 봐요</p><h1 class="koq">글자 없이 먼저 들어 보세요</h1><p class="lead">다 들으면 내용을 묻는 문제가 두 개 나와요.</p>'
+     +'<button type="button" class="bigplay" id="hearplay" aria-label="대화 듣기">'+I.spkL+'</button>'
+     +'<button type="button" class="txt" data-reveal>대본 보기</button><ol class="script" hidden>'+ex.l.listen.lines.map(x=>'<li class="'+(x.who==="A"?"a":"b")+'"><b lang="en">'+esc(x.en)+'</b><span>'+esc(x.ko)+'</span></li>').join("")+'</ol>';
+  }else if(ex.t==="quiz"){
+    m='<p class="inst">방금 들은 대화에서</p><h1 class="koq">'+esc(ex.koq)+'</h1>'+optsH(ex,false);
+  }else if(ex.t==="pair"){
+    m='<p class="inst">잘 듣고, 들린 단어를 골라요</p>'+playB(ex.say)+optsH(ex,true)+'<p class="note">'+esc(ex.tip)+'</p>';
+    auto=ex.say;
   }else if(ex.t==="echo"){
     m='<p class="inst">듣고 그대로 말해요</p>'+playB(p.en)+hidden(p,"문장 보기",true);
     auto=p.en;
@@ -157,7 +170,14 @@ function showEx(){
   $$("[data-reveal]",app).forEach(b=>b.addEventListener("click",()=>{b.nextElementSibling.hidden=false;b.hidden=true;}));
   const hb=$("#hint");
   if(hb)hb.addEventListener("click",()=>{S.hint=true;reveal();});
-  if(ex.t==="listen"||ex.t==="pic")bindChoice(ex);
+  if(ex.t==="listen"||ex.t==="pic"||ex.t==="quiz"||ex.t==="pair")bindChoice(ex);
+  else if(ex.t==="hear"){
+    const playAll=async()=>{const my=S.i;for(const x of ex.l.listen.lines){if(!S||S.i!==my||ui.busy!=="session")return;await speak(x.en);await new Promise(r=>setTimeout(r,250));}};
+    $("#dock").innerHTML='<button type="button" class="cta" id="nx">문제 풀기</button>';
+    $("#nx").addEventListener("click",()=>{stopSpeak();next();});
+    $("#hearplay").addEventListener("click",()=>{stopSpeak();playAll();});
+    playAll();
+  }
   else if(ex.t==="spell")dockSpell(ex);
   else if(ex.t==="build")dockBuild(ex);
   else if(ex.t==="frame"||ex.t==="intro"){
@@ -184,8 +204,9 @@ function bindChoice(ex){
       dock.innerHTML='<div class="fb" role="status"><p class="fb-t">맞아요</p><p class="words" lang="en">'+esc(ex.fbA)+'</p><p class="sub">'+esc(ex.fbB)+'</p><button type="button" class="cta" id="nx">다음</button></div>';
       $("#nx").addEventListener("click",next);
       if(ex.spk)speak(ex.spk,0.85);
+      if(ex.t==="pair"){S.pairOk=(S.pairOk||0)+(ex.missed?0:1);}
       fit();
-    }else{b.classList.add("no");b.disabled=true;sfx("no");}
+    }else{b.classList.add("no");b.disabled=true;sfx("no");ex.missed=true;}
   }));
 }
 function dockSpell(ex){
@@ -382,7 +403,8 @@ function finish(){
   }
   const mins=Math.max(1,Math.round((Date.now()-(S.t0||Date.now()))/60000));
   endClock();save();
-  const title=S.kind==="lesson"?esc(lesson(S.id).title)+" 수업을 마쳤어요":"복습을 마쳤어요";
+  if(S.kind==="ears"){extra='<li><span>한 번에 맞힌 소리</span><b>'+(S.pairOk||0)+' / '+S.q.length+'</b></li>';P.ears=(P.ears||[]).concat([{d:today(),ok:S.pairOk||0,n:S.q.length}]).slice(-30);save();}
+  const title=S.kind==="lesson"?esc(lesson(S.id).title)+" 수업을 마쳤어요":S.kind==="ears"?"발음 구별 듣기를 마쳤어요":"복습을 마쳤어요";
   const talk=S.kind==="lesson"&&llmReady()?'<button type="button" class="txt" id="talk">이 주제로 AI 선생님과 대화하기</button>':"";
   const id=S.id;
   app.innerHTML='<div class="fin">'+(S.kind==="lesson"?'<img class="tch fin-t" src="img/t4.webp" alt="선생님" width="432" height="540"><p class="tbub" style="margin-bottom:8px"><small>선생님</small>잘했어요! 오늘 배운 문장은 내일 복습에 다시 나와요.</p>':"")+'<h1>'+title+'</h1><ul class="rows"><li><span>방금 영어로 말한 횟수</span><b>'+S.said+'번</b></li><li><span>걸린 시간</span><b>약 '+mins+'분</b></li><li><span>연속 학습</span><b>'+streak(P)+'일</b></li>'+extra+'</ul>'+note+'</div>';
@@ -393,5 +415,17 @@ function finish(){
   if(tb)tb.addEventListener("click",()=>open("talk",{lesson:id}));
   S=null;
 }
+// Sound pairs that Korean speakers often mix up. [word A, word B, Korean tip]
+const PAIRS=[["light","right","L은 혀끝을 윗니 뒤에 붙이고, R은 혀가 어디에도 닿지 않아요."],["glass","grass","L은 혀끝을 윗니 뒤에 붙이고, R은 혀가 어디에도 닿지 않아요."],["play","pray","L은 혀끝을 윗니 뒤에 붙이고, R은 혀가 어디에도 닿지 않아요."],["long","wrong","L은 혀끝을 윗니 뒤에 붙이고, R은 혀가 어디에도 닿지 않아요."],["collect","correct","L은 혀끝을 윗니 뒤에 붙이고, R은 혀가 어디에도 닿지 않아요."],
+ ["fan","pan","F는 윗니를 아랫입술에 살짝 대고 바람을 내보내요. P는 두 입술을 붙였다 터뜨려요."],["fine","pine","F는 윗니를 아랫입술에 살짝 대고 바람을 내보내요. P는 두 입술을 붙였다 터뜨려요."],["coffee","copy","F는 윗니를 아랫입술에 살짝 대고 바람을 내보내요. P는 두 입술을 붙였다 터뜨려요."],["fool","pool","F는 윗니를 아랫입술에 살짝 대고 바람을 내보내요. P는 두 입술을 붙였다 터뜨려요."],
+ ["very","berry","V는 윗니를 아랫입술에 대고 목을 울려요. B는 두 입술을 붙였다 떼요."],["vest","best","V는 윗니를 아랫입술에 대고 목을 울려요. B는 두 입술을 붙였다 떼요."],["van","ban","V는 윗니를 아랫입술에 대고 목을 울려요. B는 두 입술을 붙였다 떼요."],["vote","boat","V는 윗니를 아랫입술에 대고 목을 울려요. B는 두 입술을 붙였다 떼요."],
+ ["think","sink","TH는 혀끝을 윗니와 아랫니 사이로 살짝 내밀어요. S는 혀를 내밀지 않아요."],["thick","sick","TH는 혀끝을 윗니와 아랫니 사이로 살짝 내밀어요. S는 혀를 내밀지 않아요."],["mouth","mouse","TH는 혀끝을 윗니와 아랫니 사이로 살짝 내밀어요. S는 혀를 내밀지 않아요."],["thing","sing","TH는 혀끝을 윗니와 아랫니 사이로 살짝 내밀어요. S는 혀를 내밀지 않아요."],
+ ["ship","sheep","ship은 짧고 힘을 빼요. sheep은 입을 옆으로 벌리고 길게 '이-' 해요."],["live","leave","live는 짧고 힘을 빼요. leave는 입을 옆으로 벌리고 길게 '이-' 해요."],["sit","seat","sit은 짧고 힘을 빼요. seat은 입을 옆으로 벌리고 길게 '이-' 해요."],["full","fool","full은 짧게, fool은 입술을 둥글게 내밀고 길게 '우-' 해요."],
+ ["zoo","Jew","Z는 '스'에 목 울림을 넣은 소리예요. J는 혀를 입천장에 댔다 떼는 '쥐'에 가까워요."],["walk","work","walk는 '워-ㅋ', work는 혀를 뒤로 말아 '워r-ㅋ' 해요."],["bad","bed","bad는 입을 크게 벌린 '애', bed는 입을 조금만 벌린 '에'예요."],["cap","cup","cap은 입을 크게 벌린 '애', cup은 짧게 '어'에 가까워요."]];
+function startEars(){
+  const q=shuffle(PAIRS).slice(0,10).map(([a,b,tip])=>{const say=Math.random()<0.5?a:b;return {t:"pair",say,ans:say,opts:[a,b],tip,fbA:a+"  ·  "+b,fbB:tip,spk:say};});
+  begin({kind:"ears",q});
+}
+register("ears",startEars);
 register("lesson",startLesson);
 register("review",startReview);

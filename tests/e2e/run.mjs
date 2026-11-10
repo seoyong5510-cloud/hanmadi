@@ -210,6 +210,17 @@ try{
   ok("lesson recorded: done, 24 cards, spoken count grew, time tracked",st.done===true&&st.cards===24&&st.said>15&&st.secs>=1,JSON.stringify(st));
   await page.click("#home");
 
+  /* 3b. sound-pair ear training */
+  await page.click("[data-ears]");await page.waitForSelector(".bigplay");
+  let pairs=0;
+  for(let g=0;g<40&&!(await page.$(".fin"));g++){
+    if(await page.$("#nx")){await page.click("#nx");await page.waitForTimeout(30);continue;}
+    const want=await page.evaluate(()=>document.querySelector(".bigplay").dataset.say);
+    await page.locator(".opt",{hasText:new RegExp("^"+want+"$")}).click();pairs++;await page.waitForSelector("#nx");
+  }
+  ok("ear training: ten sound pairs, then a result",pairs===10&&(await txt(page,".fin")).includes("10 / 10"),pairs+" "+(await txt(page,".fin")).slice(0,80));
+  await page.click("#home");
+
   /* 4. persistence across a restart */
   await page.reload();await page.waitForFunction(()=>window.__t&&document.querySelector(".tabs"));
   ok("progress survives closing and reopening",await page.evaluate(()=>window.__t.P.done.l2===true&&Object.keys(window.__t.P.cards).length===24));

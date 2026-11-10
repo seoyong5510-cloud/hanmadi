@@ -28,7 +28,7 @@ export function sanitize(o){
   if(Array.isArray(o.usage))p.usage=o.usage.filter(isObj).slice(-3000);
   if(isObj(o.turns))p.turns={n:Number(o.turns.n)||0,fixed:Number(o.turns.fixed)||0};
   if(isObj(o.ai))p.ai={url:String(o.ai.url||"").replace(/\/+$/,""),token:String(o.ai.token||"")};
-  p.snd=o.snd!==false;p.tread=o.tread===true;p.mic=o.mic?1:0;
+  p.snd=o.snd!==false;p.tread=o.tread===true;p.ears=Array.isArray(o.ears)?o.ears.slice(-30):[];p.mic=o.mic?1:0;
   p.goal=[5,10,20,30].includes(o.goal)?o.goal:10;
   p.migrated=!!o.migrated;
   return p;

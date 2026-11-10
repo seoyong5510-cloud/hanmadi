@@ -371,3 +371,8 @@ details.gram{margin:8px 0 4px;padding:10px 14px}
 .tframe u{text-decoration:none;display:inline-block;min-width:54px;border-bottom:4px solid var(--brand)}
 .tsay{justify-self:start}
 .fin-t{width:132px;height:132px;aspect-ratio:1;border-radius:50%;object-position:50% 18%;margin:0 auto 12px}
+/* listening script */
+.script{margin:14px 0 0;padding:0;list-style:none;display:grid;gap:8px}
+.script li{display:grid;gap:1px;padding:10px 14px;border-radius:14px;background:var(--fill);max-width:88%}
+.script li.b{justify-self:end;background:color-mix(in srgb,var(--brand) 9%,var(--bg))}
+.script b{font-size:16px}.script span{font-size:13px;color:var(--sub)}
