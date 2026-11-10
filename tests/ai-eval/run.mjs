@@ -12,7 +12,7 @@ const hangul=s=>/[가-힣]/.test(s||"");
 const words=s=>(s||"").trim().split(/\s+/).length;
 const out=[];let pass=0,cost=0;
 for(const [i,c] of cases.entries()){
-  const body={cefr:c.cefr,role:{topicKo:"카페에서 주문하기",role:"a friendly barista"},memory:{},history:[{r:"a",t:"Hi! Welcome. What can I get for you?"},{r:"u",t:c.said}],start:false,hint:false};
+  const body={cefr:c.cefr,role:"You are a friendly barista at a cafe. The learner is a customer ordering.",memory:[],history:[{r:"a",t:"Hi! Welcome. What can I get for you?"},{r:"u",t:c.said}],start:false,hint:false};
   let j,ok=false,why="";
   try{
     const r=await fetch(RELAY.replace(/\/$/,"")+"/v1/turn",{method:"POST",headers:{"content-type":"application/json","x-app-token":TOKEN},body:JSON.stringify(body)});

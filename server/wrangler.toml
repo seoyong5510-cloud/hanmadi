@@ -13,6 +13,6 @@ LLM_MODEL = "claude-haiku-5-5"
 AZURE_SPEECH_REGION = "koreacentral"
 TTS_VOICE = "en-US-JennyNeural"
 ALLOW_ORIGIN = "https://seoyong5510-cloud.github.io"
-# Price per million tokens, used only to show estimated cost in the app.
+# Price per million tokens, used only to show estimated cost in the app. Placeholder: set to your model's current price.
 PRICE_IN = "1"
 PRICE_OUT = "5"
