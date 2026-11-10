@@ -148,6 +148,19 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .ok .cta{background:var(--ok)}
 .fb .txt{justify-self:center}
 
+/* words + pictures */
+.pic{font-size:68px;line-height:1.1;margin-bottom:12px}
+.row .ic.em{font-size:22px}
+.row .dn{flex:none;color:var(--ok)}
+.slots{display:flex;flex-wrap:wrap;gap:6px;margin-top:24px}
+.slot{display:grid;place-items:center;width:32px;height:46px;border-bottom:3px solid var(--line);font-size:26px;font-weight:800}
+.slot.on{border-color:var(--brand)}
+.tiles{display:flex;flex-wrap:wrap;justify-content:center;gap:8px;padding:4px 0 10px}
+.tile{width:52px;height:56px;border-radius:14px;background:var(--fill);font-size:24px;font-weight:700;box-shadow:0 3px 0 var(--line)}
+.tile:active{transform:translateY(2px);box-shadow:0 1px 0 var(--line)}
+.tile:disabled{opacity:.22;box-shadow:none}
+.tile.bad{animation:shake .3s;background:var(--no-bg);color:var(--no)}
+
 /* pronunciation */
 .tips{margin-top:26px;display:grid;gap:10px;font-size:14px;line-height:1.5;color:var(--sub)}
 .tips li{display:flex;gap:10px}
@@ -299,7 +312,27 @@ const L=[
         {them:"Oh, sorry. Are you a tourist?",ko:"아, 미안해요. 여행 오셨어요?",you:2},{them:"Okay. Go... two blocks.",ko:"네. 두 블록... 가세요.",you:3}]}
 ];
 const UNITS=[{name:"만남과 인사",ids:["l1","l2","l10"]},{name:"가게에서",ids:["l3","l5","l6"]},{name:"여행 중에",ids:["l4","l7","l8","l9"]}];
-const LMAP={};L.forEach(l=>{LMAP[l.id]=l;});
+const WORDS={
+ l1:[["hello","안녕하세요","👋"],["meet","만나다","🤝"],["good","좋은","👍"],["happy","행복한","😊"],["tired","피곤한","😴"]],
+ l2:[["company","회사","🏢"],["soccer","축구","⚽"],["music","음악","🎵"],["movie","영화","🎬"],["live","살다","🏠"]],
+ l10:[["hot","더운","☀️"],["cold","추운","❄️"],["rainy","비 오는","🌧️"],["today","오늘","📅"],["tomorrow","내일","🌅"]],
+ l3:[["coffee","커피","☕"],["water","물","💧"],["tea","차","🍵"],["ice","얼음","🧊"],["here","여기","📍"]],
+ l5:[["table","식탁, 자리","🍽️"],["menu","메뉴판","📖"],["check","계산서","🧾"],["two","둘","✌️"],["four","넷","🍀"]],
+ l6:[["size","사이즈","📏"],["bag","봉투, 가방","🛍️"],["black","검은색","⚫"],["big","큰","🐘"],["small","작은","🐭"]],
+ l4:[["subway","지하철","🚇"],["station","역","🚉"],["bus","버스","🚌"],["restroom","화장실","🚻"],["hotel","호텔","🏨"]],
+ l7:[["airport","공항","✈️"],["taxi","택시","🚕"],["stop","멈추다","🛑"],["change","잔돈","🪙"],["address","주소","📮"]],
+ l8:[["name","이름","📛"],["breakfast","아침 식사","🍳"],["password","비밀번호","🔑"],["time","시간","⏰"],["room","방","🚪"]],
+ l9:[["help","돕다","🆘"],["slowly","천천히","🐢"],["picture","사진","📷"],["write","쓰다","✍️"],["wait","기다리다","⏳"]]
+};
+const PE={l1:["👋","🤝","🙂","😊"],l2:["🇰🇷","🏠","🏢","⚽"],l10:["☀️","😪","🌈","👋"],l3:["☕","🧊","🪑","💵"],l5:["🍽️","📖","👉","🧾"],
+ l6:["👀","📏","👕","🛍️"],l4:["🙋","🚇","🚶","🙏"],l7:["✈️","⏱️","🛑","🪙"],l8:["📅","📛","🍳","🔑"],l9:["🆘","❓","🐢","🔁"]};
+const LE={l1:"👋",l2:"🙋",l10:"☀️",l3:"☕",l5:"🍽️",l6:"👕",l4:"🗺️",l7:"🚕",l8:"🏨",l9:"🙏"};
+const LMAP={};
+L.forEach(l=>{
+  LMAP[l.id]=l;l.e=LE[l.id]||"";
+  l.words=(WORDS[l.id]||[]).map(a=>({w:a[0],ko:a[1],e:a[2]}));
+  l.ph.forEach((x,i)=>{x.e=(PE[l.id]||[])[i]||"";});
+});
 const ORDER=UNITS.flatMap(u=>u.ids);
 const INT=[1,2,4,7,15,30,60];
 
@@ -341,10 +374,12 @@ function save(){try{localStorage.setItem(KEY,JSON.stringify(P));}catch(e){}}
 function addCards(l,due){
   l.ph.forEach((p,i)=>{const k=l.id+":"+i;if(!P.cards[k])P.cards[k]={lv:0,due:due};});
   l.pat.items.forEach((p,i)=>{const k=l.id+":p"+i;if(!P.cards[k])P.cards[k]={lv:0,due:due};});
+  l.words.forEach((p,i)=>{const k=l.id+":w"+i;if(!P.cards[k])P.cards[k]={lv:0,due:due};});
 }
 function cardData(k){
   const a=k.split(":"),l=LMAP[a[0]];
   if(!l||!a[1])return null;
+  if(a[1][0]==="w")return l.words[+a[1].slice(1)]||null;
   return a[1][0]==="p"?(l.pat.items[+a[1].slice(1)]||null):(l.ph[+a[1]]||null);
 }
 function dueKeys(){const t=today();return Object.keys(P.cards).filter(k=>P.cards[k].due<=t&&cardData(k));}
@@ -386,6 +421,7 @@ function sfx(name){
     AC=AC||new C();
     if(AC.state==="suspended")AC.resume();
     if(name==="tap")note(520,0,0.06,"sine",0.08);
+    else if(name==="miss")note(196,0,0.1,"sine",0.14);
     else if(name==="ok"){note(659,0,0.14,"triangle");note(988,0.1,0.26,"triangle");}
     else if(name==="perfect"){note(659,0,0.12,"triangle");note(831,0.09,0.12,"triangle");note(1319,0.18,0.34,"triangle");}
     else if(name==="no"){note(233,0,0.16,"sine",0.2);note(185,0.13,0.26,"sine",0.2);}
@@ -515,7 +551,7 @@ function viewToday(){
    +'<ol class="week" aria-label="이번 주 연습한 날">'+week+'</ol>'
    +'<h2 class="sec">오늘 할 일</h2><ul class="rows">'
    +'<li><button type="button" class="row'+(due?"":" off")+'" '+(due?"data-review":"disabled")+'><span class="ic'+(due?"":" done")+'">'+(due?due:I.chk)+'</span><span class="tx"><b>복습</b><small>'+(due?"잊기 전에 다시 말해 볼 문장 "+due+"개":"지금 복습할 문장이 없어요")+'</small></span>'+(due?I.go:"")+'</button></li>'
-   +(nl?'<li><button type="button" class="row" data-lesson="'+nl.id+'"><span class="ic">'+(ORDER.indexOf(nl.id)+1)+'</span><span class="tx"><b>'+esc(nl.title)+'</b><small>새 수업 · '+esc(nl.sub)+'</small></span>'+I.go+'</button></li>'
+   +(nl?'<li><button type="button" class="row" data-lesson="'+nl.id+'"><span class="ic em">'+nl.e+'</span><span class="tx"><b>'+esc(nl.title)+'</b><small>새 수업 · '+esc(nl.sub)+'</small></span>'+I.go+'</button></li>'
         :'<li><div class="row off"><span class="ic done">'+I.chk+'</span><span class="tx"><b>모든 수업 완료</b><small>복습으로 내 것으로 만들어요</small></span></div></li>')
    +'</ul>'
    +(SR?"":'<p class="note">이 브라우저에서는 마이크를 쓸 수 없어 글자로 입력해요. 크롬 앱에서 열면 소리 내어 연습할 수 있어요.</p>');
@@ -528,7 +564,7 @@ function viewLessons(){
   UNITS.forEach(u=>{
     h+='<h2 class="unit">'+u.name+'</h2><ul class="rows">'+u.ids.map(id=>{
       const l=LMAP[id],dn=P.done[id];
-      return '<li><button type="button" class="row" data-lesson="'+id+'"><span class="ic'+(dn?" done":"")+'">'+(dn?I.chk:ORDER.indexOf(id)+1)+'</span><span class="tx"><b>'+esc(l.title)+'</b><small>'+esc(l.sub)+'</small></span>'+(nl&&nl.id===id?'<span class="chip">다음 수업</span>':I.go)+'</button></li>';
+      return '<li><button type="button" class="row" data-lesson="'+id+'"><span class="ic em">'+l.e+'</span><span class="tx"><b>'+esc(l.title)+'</b><small>'+esc(l.sub)+'</small></span>'+(nl&&nl.id===id?'<span class="chip">다음 수업</span>':dn?'<span class="dn">'+I.chk+'</span>':I.go)+'</button></li>';
     }).join("")+'</ul>';
   });
   app.innerHTML=h;chrome.innerHTML=tabsHtml();
@@ -539,7 +575,7 @@ function viewStats(){
   const days=[];for(let k=6;k>=0;k--){const x=new Date();x.setDate(x.getDate()-k);days.push({n:P.days[dayStr(x)]||0,d:dn[x.getDay()],now:k===0});}
   const mx=Math.max(1,...days.map(x=>x.n));
   app.innerHTML='<h1 class="ptitle">기록</h1><div class="big"><b>'+streak()+'</b><span>일 연속</span></div>'
-   +'<div class="three"><div><b>'+keys.length+'</b><span>배운 문장</span></div><div><b>'+(keys.length-mine)+'</b><span>익히는 중</span></div><div><b>'+mine+'</b><span>내 것이 된 문장</span></div></div>'
+   +'<div class="three"><div><b>'+keys.length+'</b><span>배운 문장·단어</span></div><div><b>'+(keys.length-mine)+'</b><span>익히는 중</span></div><div><b>'+mine+'</b><span>내 것이 된 문장</span></div></div>'
    +'<h2 class="sec">최근 7일 동안 말한 횟수</h2><ol class="bars">'
    +days.map(x=>'<li class="'+(x.now?"now":"")+'"><span>'+x.n+'</span><span class="col" style="height:'+Math.round(x.n/mx*100)+'%"></span><span>'+x.d+'</span></li>').join("")+'</ol>'
    +'<p class="note">배운 문장은 1일, 2일, 4일, 7일, 15일 뒤에 다시 물어봐요. 힌트 없이 네 번 연달아 맞히면 내 것이 된 문장으로 넘어가요. 기록은 이 휴대폰에 저장돼요.</p>'
@@ -550,20 +586,26 @@ function viewStats(){
 
 /* ---------- session ---------- */
 function startLesson(id){
-  const l=LMAP[id],q=[];
+  const l=LMAP[id],q=[],ws=shuffle(l.words);
+  const picQ=wd=>({t:"pic",wd:wd,ans:wd.w,fbA:wd.e+" "+wd.w,fbB:wd.ko,spk:wd.w,
+    opts:shuffle([wd.w].concat(shuffle(l.words.filter(x=>x!==wd)).slice(0,2).map(x=>x.w)))});
   l.ph.forEach(p=>q.push({t:"learn",p:p,en:p.en}));
-  if(TTS)shuffle([0,1,2,3]).slice(0,2).forEach(i=>{
+  ws.slice(0,2).forEach(wd=>q.push(picQ(wd)));
+  if(TTS){
+    const i=Math.floor(Math.random()*l.ph.length),pp=l.ph[i];
     const others=shuffle(l.ph.filter((x,k)=>k!==i)).slice(0,2).map(x=>x.ko);
-    q.push({t:"listen",p:l.ph[i],opts:shuffle([l.ph[i].ko].concat(others))});
-  });
+    q.push({t:"listen",p:pp,ans:pp.ko,fbA:pp.en,fbB:pp.say,opts:shuffle([pp.ko].concat(others))});
+  }
   shuffle(l.ph).forEach(p=>q.push({t:"recall",p:p,en:p.en}));
+  ws.slice(0,2).forEach(wd=>q.push({t:"spell",wd:wd}));
   q.push({t:"frame",l:l});
   l.pat.items.forEach(p=>q.push({t:"pat",p:p,en:p.en,l:l}));
+  ws.slice(2,4).forEach(wd=>q.push({t:"spell",wd:wd}));
   l.talk.forEach(tk=>q.push({t:"talk",tk:tk,p:l.ph[tk.you],en:l.ph[tk.you].en,l:l}));
   S={kind:"lesson",id:id,q:q,i:0,said:0};showEx();
 }
 function startReview(){
-  const q=shuffle(dueKeys()).slice(0,12).map(k=>{const p=cardData(k);return {t:"recall",p:p,en:p.en,card:k};});
+  const q=shuffle(dueKeys()).slice(0,12).map(k=>{const p=cardData(k);return p.w&&!p.en?{t:"spell",wd:p,card:k,hard:true}:{t:"recall",p:p,en:p.en,card:k};});
   if(!q.length)return;
   S={kind:"review",q:q,i:0,said:0};showEx();
 }
@@ -575,15 +617,21 @@ function showEx(){
   S.first=true;S.hint=false;S.fails=0;
   let m="",auto="";
   if(ex.t==="learn"){
-    m='<p class="inst">듣고 따라 말해요</p><h1 class="en" lang="en">'+esc(p.en)+'</h1><p class="say">'+esc(p.say)+'</p><p class="ko">'+esc(p.ko)+'</p>'+auds(p.en)
+    m='<p class="inst">듣고 따라 말해요</p>'+(p.e?'<div class="pic" aria-hidden="true">'+p.e+'</div>':"")+'<h1 class="en" lang="en">'+esc(p.en)+'</h1><p class="say">'+esc(p.say)+'</p><p class="ko">'+esc(p.ko)+'</p>'+auds(p.en)
      +(function(){const t=tipsFor(p.en.split(/\s+/),2);return t.length?'<ul class="tips" aria-label="발음 팁">'+t.map(x=>'<li><b lang="en">'+x.k+'</b><span><span lang="en">'+esc(x.w)+'</span> · '+x.t+'</span></li>').join("")+'</ul>':"";})();
     auto=p.en;
+  }else if(ex.t==="pic"){
+    m='<p class="inst">그림에 맞는 단어를 골라요</p><div class="pic" aria-hidden="true">'+ex.wd.e+'</div><h1 class="koq">'+esc(ex.wd.ko)+'</h1>'
+     +'<div class="opts" style="margin-top:24px">'+ex.opts.map(o=>'<button type="button" class="opt" lang="en">'+esc(o)+'</button>').join("")+'</div>';
+  }else if(ex.t==="spell"){
+    m='<p class="inst">글자를 순서대로 눌러 단어를 써요</p><div class="pic" aria-hidden="true">'+ex.wd.e+'</div><h1 class="koq">'+esc(ex.wd.ko)+'</h1>'
+     +'<div class="slots" lang="en">'+ex.wd.w.split("").map(()=>'<span class="slot"></span>').join("")+'</div>';
   }else if(ex.t==="listen"){
     m='<p class="inst">잘 듣고 뜻을 골라요</p><button type="button" class="bigplay" data-say="'+esc(p.en)+'" data-rate="0.9" aria-label="다시 듣기">'+I.spkL+'</button>'
      +'<div class="opts">'+ex.opts.map(o=>'<button type="button" class="opt">'+esc(o)+'</button>').join("")+'</div>';
     auto=p.en;
   }else if(ex.t==="recall"){
-    m='<p class="inst">'+(S.kind==="review"?"기억나는 대로 영어로 말해요":"이번엔 안 보고 영어로 말해요")+'</p><h1 class="koq">'+esc(p.ko)+'</h1>'+hidden(p);
+    m='<p class="inst">'+(S.kind==="review"?"기억나는 대로 영어로 말해요":"이번엔 안 보고 영어로 말해요")+'</p>'+(p.e?'<div class="pic" aria-hidden="true">'+p.e+'</div>':"")+'<h1 class="koq">'+esc(p.ko)+'</h1>'+hidden(p);
   }else if(ex.t==="frame"){
     const f=esc(ex.l.pat.frame).replace("___","<u>&nbsp;</u>");
     m='<p class="inst">단어만 바꾸면 새 문장이 돼요</p><h1 class="frame" lang="en">'+f+'</h1><ul class="swap">'
@@ -605,7 +653,8 @@ function showEx(){
   bindAud(app);
   const hb=$("#hint");
   if(hb)hb.addEventListener("click",()=>{S.hint=true;reveal();});
-  if(ex.t==="listen")bindListen(ex);
+  if(ex.t==="listen"||ex.t==="pic")bindListen(ex);
+  else if(ex.t==="spell")dockSpell(ex);
   else if(ex.t==="frame"){
     $("#dock").innerHTML='<button type="button" class="cta" id="nx">말해 볼게요</button>';
     $("#nx").addEventListener("click",next);
@@ -622,13 +671,37 @@ function next(){
 function bindListen(ex){
   const dock=$("#dock");
   app.querySelectorAll(".opt").forEach(b=>b.addEventListener("click",()=>{
-    if(b.textContent===ex.p.ko){
+    if(b.textContent===ex.ans){
       app.querySelectorAll(".opt").forEach(o=>{o.disabled=true;});
       b.classList.add("ok");sfx("ok");
       dock.className="dock fixed ok";
-      dock.innerHTML='<div class="fb"><p class="fb-t">맞아요</p><p class="words" lang="en">'+esc(ex.p.en)+'</p><p class="sub">'+esc(ex.p.say)+'</p><button type="button" class="cta" id="nx">다음</button></div>';
+      dock.innerHTML='<div class="fb"><p class="fb-t">맞아요</p><p class="words" lang="en">'+esc(ex.fbA)+'</p><p class="sub">'+esc(ex.fbB)+'</p><button type="button" class="cta" id="nx">다음</button></div>';
       $("#nx").addEventListener("click",next);
+      if(ex.spk)speak(ex.spk,0.85);
     }else{b.classList.add("no");b.disabled=true;sfx("no");}
+  }));
+}
+function dockSpell(ex){
+  const w=ex.wd.w,dock=$("#dock"),slots=app.querySelectorAll(".slot");
+  let pos=0,miss=0,letters=w.split("");
+  if(ex.hard)letters=letters.concat(shuffle("aeioustrnl".split("").filter(c=>!w.includes(c))).slice(0,2));
+  let sh=shuffle(letters);
+  if(sh.join("")===w&&w.length>1)sh=sh.reverse();
+  dock.className="dock fixed";
+  dock.innerHTML='<div class="tiles" lang="en">'+sh.map(c=>'<button type="button" class="tile">'+c+'</button>').join("")+'</div>';
+  dock.querySelectorAll(".tile").forEach(b=>b.addEventListener("click",()=>{
+    if(b.textContent!==w[pos]){
+      miss++;b.classList.remove("bad");void b.offsetWidth;b.classList.add("bad");sfx("miss");
+      setTimeout(()=>b.classList.remove("bad"),350);
+      return;
+    }
+    slots[pos].textContent=w[pos];slots[pos].classList.add("on");b.disabled=true;pos++;sfx("tap");
+    if(pos<w.length)return;
+    if(ex.card)grow(ex.card,miss===0);
+    save();sfx(miss?"ok":"perfect");speak(w,0.85);
+    dock.className="dock fixed ok";
+    dock.innerHTML='<div class="fb"><p class="fb-t">'+(miss?"완성했어요":"한 번에 썼어요")+'</p><p class="words" lang="en">'+esc(ex.wd.e+" "+w)+'</p><p class="sub">'+esc(ex.wd.ko)+'</p><button type="button" class="cta" id="nx">다음</button></div>';
+    $("#nx").addEventListener("click",next);
   }));
 }
 function dockMic(ex){
@@ -718,7 +791,7 @@ function finish(){
   if(S.kind==="lesson"){
     const l=LMAP[S.id];
     P.done[l.id]=true;addCards(l,plusDays(1));
-    extra='<li><span>내일 복습할 문장</span><b>'+(l.ph.length+l.pat.items.length)+'개</b></li>';
+    extra='<li><span>내일 복습할 문장·단어</span><b>'+(l.ph.length+l.pat.items.length+l.words.length)+'개</b></li>';
   }
   save();
   const st=streak(),title=S.kind==="lesson"?esc(LMAP[S.id].title)+" 수업을 마쳤어요":"복습을 마쳤어요";
