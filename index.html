@@ -148,6 +148,14 @@ button{cursor:pointer;border:0;background:none;padding:0}
 .ok .cta{background:var(--ok)}
 .fb .txt{justify-self:center}
 
+/* pronunciation */
+.tips{margin-top:26px;display:grid;gap:10px;font-size:14px;line-height:1.5;color:var(--sub)}
+.tips li{display:flex;gap:10px}
+.tips b{flex:none;min-width:44px;height:24px;padding:0 8px;border-radius:8px;background:var(--fill);color:var(--ink);font-weight:700;text-align:center}
+.meter{width:100%;height:8px;border-radius:99px;background:rgba(128,128,128,.22);overflow:hidden}
+.meter i{display:block;height:100%;border-radius:99px;background:var(--ok)}
+.fb .tip{font-size:14px;color:var(--ink);line-height:1.5}
+
 /* motion */
 @keyframes up{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
 @keyframes pop{0%{transform:scale(.6)}60%{transform:scale(1.12)}100%{transform:scale(1)}}
@@ -399,6 +407,58 @@ function confetti(){
   })(t0);
 }
 
+/* ---------- pronunciation help ---------- */
+const TIPS=[
+ [/th/,"th","혀끝을 윗니 아래에 살짝 물고 바람을 내요."],
+ [/f|ph/,"f","윗니를 아랫입술에 살짝 대고 바람 소리를 내요. 입술을 붙이는 'ㅍ'가 아니에요."],
+ [/v/,"v","f와 같은 입 모양에서 목을 울려요. 'ㅂ'가 아니에요."],
+ [/r/,"r","혀끝이 입천장에 닿지 않게 뒤로 살짝 말아요."],
+ [/l/,"l","혀끝을 윗니 바로 뒤에 꾹 대요."]
+];
+function tipsFor(words,max){
+  const out=[];
+  TIPS.forEach(t=>{
+    if(out.length>=max)return;
+    const w=words.map(x=>x.toLowerCase().replace(/[^a-z'-]/g,"")).find(x=>t[0].test(x));
+    if(w)out.push({k:t[1],w:w,t:t[2]});
+  });
+  return out;
+}
+let recBusy=false;
+async function compare(en,btn){
+  if(recBusy)return;
+  if(!navigator.mediaDevices||!window.MediaRecorder){btn.textContent="이 브라우저는 녹음을 지원하지 않아요";btn.disabled=true;return;}
+  recBusy=true;stopMic();
+  try{speechSynthesis.cancel();}catch(e){}
+  let stream;
+  try{stream=await navigator.mediaDevices.getUserMedia({audio:true});}
+  catch(e){recBusy=false;btn.textContent="마이크를 허용해야 녹음할 수 있어요";return;}
+  let mr;
+  try{mr=new MediaRecorder(stream);}
+  catch(e){stream.getTracks().forEach(t=>t.stop());recBusy=false;btn.textContent="이 브라우저는 녹음을 지원하지 않아요";return;}
+  const chunks=[];
+  mr.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data);};
+  mr.onstop=()=>{
+    stream.getTracks().forEach(t=>t.stop());
+    const url=URL.createObjectURL(new Blob(chunks,{type:mr.mimeType||"audio/webm"}));
+    const a=new Audio(url);
+    let moved=false;
+    const after=()=>{
+      if(moved)return;moved=true;
+      URL.revokeObjectURL(url);
+      btn.textContent="원어민 발음 재생 중";
+      speak(en,0.9);
+      setTimeout(()=>{recBusy=false;if(btn.isConnected){btn.textContent="다시 녹음해서 비교하기";btn.disabled=false;}},900+en.length*75);
+    };
+    btn.textContent="내 목소리 재생 중";
+    a.onended=after;a.onerror=after;
+    a.play().catch(after);
+  };
+  btn.disabled=true;btn.textContent="녹음 중… 지금 말하세요";
+  mr.start();
+  setTimeout(()=>{try{if(mr.state!=="inactive")mr.stop();}catch(e){}},Math.min(7000,1800+en.split(" ").length*550));
+}
+
 /* ---------- grading ---------- */
 const FIX={"i'm":"i am","im":"i am","i'll":"i will","it's":"it is","its":"it is","don't":"do not","dont":"do not","how's":"how is",
   "1":"one","2":"two","3":"three","4":"four","5":"five","ok":"okay","thankyou":"thank you","thanks":"thank you",
@@ -515,7 +575,8 @@ function showEx(){
   S.first=true;S.hint=false;S.fails=0;
   let m="",auto="";
   if(ex.t==="learn"){
-    m='<p class="inst">듣고 따라 말해요</p><h1 class="en" lang="en">'+esc(p.en)+'</h1><p class="say">'+esc(p.say)+'</p><p class="ko">'+esc(p.ko)+'</p>'+auds(p.en);
+    m='<p class="inst">듣고 따라 말해요</p><h1 class="en" lang="en">'+esc(p.en)+'</h1><p class="say">'+esc(p.say)+'</p><p class="ko">'+esc(p.ko)+'</p>'+auds(p.en)
+     +(function(){const t=tipsFor(p.en.split(/\s+/),2);return t.length?'<ul class="tips" aria-label="발음 팁">'+t.map(x=>'<li><b lang="en">'+x.k+'</b><span><span lang="en">'+esc(x.w)+'</span> · '+x.t+'</span></li>').join("")+'</ul>':"";})();
     auto=p.en;
   }else if(ex.t==="listen"){
     m='<p class="inst">잘 듣고 뜻을 골라요</p><button type="button" class="bigplay" data-say="'+esc(p.en)+'" data-rate="0.9" aria-label="다시 듣기">'+I.spkL+'</button>'
@@ -587,14 +648,14 @@ function dockMic(ex){
     try{speechSynthesis.cancel();}catch(e){}
     const r=new SR();rec=r;
     r.lang="en-US";r.interimResults=true;r.continuous=false;r.maxAlternatives=3;
-    const finals=[],alts=[];let err="";
+    const finals=[],alts=[];let err="",conf=0;
     heard.textContent="";
     r.onstart=()=>setOn(true);
     r.onresult=e=>{
       let live="";
       for(let i=e.resultIndex;i<e.results.length;i++){
         const res=e.results[i];
-        if(res.isFinal){finals.push(res[0].transcript);if(finals.length===1)for(let k=1;k<res.length;k++)alts.push(res[k].transcript);}
+        if(res.isFinal){finals.push(res[0].transcript);if(finals.length===1){conf=res[0].confidence||0;for(let k=1;k<res.length;k++)alts.push(res[k].transcript);}}
         else live+=res[0].transcript;
       }
       heard.textContent=(finals.join(" ")+" "+live).trim();
@@ -607,14 +668,17 @@ function dockMic(ex){
       if(err==="not-allowed"||err==="service-not-allowed"){heard.textContent="마이크 권한이 꺼져 있어요. 주소창 왼쪽 아이콘에서 마이크를 허용해 주세요.";return;}
       const text=finals.join(" ").trim();
       if(!text){heard.textContent="잘 안 들렸어요. 한 번 더 눌러 말해 주세요.";return;}
-      answer(ex,text,finals.length===1?alts:[]);
+      answer(ex,text,finals.length===1?alts:[],finals.length===1?conf:0);
     };
     try{r.start();}catch(e){rec=null;setOn(false);heard.textContent="마이크를 켤 수 없어요. 키보드로 입력해 주세요.";}
   });
 }
-function answer(ex,text,alts){
-  let g=grade(ex.en,text);
-  (alts||[]).forEach(a=>{const x=grade(ex.en,a);if(x.score>g.score){g=x;text=a;}});
+function answer(ex,text,alts,conf){
+  let g=grade(ex.en,text);conf=conf||0;
+  (alts||[]).forEach(a=>{const x=grade(ex.en,a);if(x.score>g.score){g=x;text=a;conf=Math.min(conf,0.6);}});
+  const pct=Math.round(conf*100);
+  const clear=conf>0?'<p class="sub">또렷함 '+pct+'% · '+(conf>=0.9?"아주 또렷하게 들렸어요":conf>=0.75?"잘 들렸어요":"알아듣긴 했지만 조금 흐렸어요. 천천히 또박또박 말해 보세요")+'</p><div class="meter"><i style="width:'+pct+'%"></i></div>':"";
+  const cmp='<button type="button" class="txt" id="cmp">녹음해서 원어민과 비교하기</button>';
   const ok=g.score>=0.7,dock=$("#dock");
   const words=g.words.map(w=>'<span class="w '+(w.hit?"hit":"miss")+'">'+esc(w.text)+'</span>').join(" ");
   if(ok){
@@ -626,16 +690,20 @@ function answer(ex,text,alts){
     try{navigator.vibrate&&navigator.vibrate(20);}catch(e){}
     reveal();
     dock.className="dock fixed ok";
-    dock.innerHTML='<div class="fb"><p class="fb-t">'+(g.score===1?"정확해요":"좋아요, 통해요")+'</p><p class="words" lang="en">'+words+'</p><button type="button" class="cta" id="nx">다음</button></div>';
+    dock.innerHTML='<div class="fb"><p class="fb-t">'+(g.score===1?"정확해요":"좋아요, 통해요")+'</p><p class="words" lang="en">'+words+'</p>'+clear+'<button type="button" class="cta" id="nx">다음</button>'+cmp+'</div>';
     $("#nx").addEventListener("click",next);
+    $("#cmp").addEventListener("click",e=>compare(ex.en,e.currentTarget));
   }else{
     S.first=false;S.fails++;sfx("no");
     try{navigator.vibrate&&navigator.vibrate([30,40,30]);}catch(e){}
     reveal();
     dock.className="dock fixed no";
-    dock.innerHTML='<div class="fb"><p class="fb-t">조금만 더요</p><p class="words" lang="en">'+words+'</p><p class="sub">내가 한 말: '+esc(text)+'</p><button type="button" class="cta dark" id="re">다시 말하기</button>'
+    dock.innerHTML='<div class="fb"><p class="fb-t">조금만 더요</p><p class="words" lang="en">'+words+'</p><p class="sub">내가 한 말: '+esc(text)+'</p>'
+     +tipsFor(g.words.filter(w=>!w.hit).map(w=>w.text),1).map(x=>'<p class="tip"><b lang="en">'+esc(x.w)+'</b>의 '+x.k+' 소리: '+x.t+'</p>').join("")
+     +'<button type="button" class="cta dark" id="re">다시 말하기</button>'+cmp
      +(S.fails>=2?'<button type="button" class="txt" id="skip">일단 넘어가기</button>':"")+'</div>';
     $("#re").addEventListener("click",()=>dockMic(ex));
+    $("#cmp").addEventListener("click",e=>compare(ex.en,e.currentTarget));
     const sk=$("#skip");
     if(sk)sk.addEventListener("click",()=>{if(ex.card){grow(ex.card,false);save();}next();});
   }
