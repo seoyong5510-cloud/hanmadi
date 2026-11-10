@@ -10,7 +10,7 @@ import {SR} from "../speech/sr.js";
 import {speak,stopSpeak,canSpeak} from "../speech/tts.js";
 import {sfx} from "../speech/sfx.js";
 import {relayReady,health,caps,usageSummary,errorKo} from "../ai/relay.js";
-import {I} from "./icons.js";
+import {I,art} from "./icons.js";
 import {app,chrome,$,$$,ui,register,show,open,enter,tabsHtml,bindTabs} from "./nav.js";
 
 const DN=["일","월","화","수","목","금","토"];
@@ -44,7 +44,7 @@ function viewToday(){
   const hero=pl.pct>=100?"오늘 목표를 채웠어요":st>1?st+"일째 이어가고 있어요":did?"좋아요, 조금만 더 해 봐요":pl.due?"배운 문장부터 다시 꺼내 봐요":"오늘 네 문장만 말해 봐요";
   const nl=pl.next,up=LEVELS[levelIndex(P.level)+1];
   let rows='<li><button type="button" class="row'+(pl.due?"":" off")+'" '+(pl.due?"data-review":"disabled")+'><span class="ic'+(pl.due?"":" done")+'">'+(pl.due?pl.due:I.chk)+'</span><span class="tx"><b>복습</b><small>'+(pl.due?"잊기 전에 다시 말해 볼 문장·단어 "+pl.due+"개":"지금 복습할 것이 없어요")+'</small></span>'+(pl.due?I.go:"")+'</button></li>';
-  rows+=nl?'<li><button type="button" class="row" data-lesson="'+nl.id+'"><span class="ic em">'+nl.e+'</span><span class="tx"><b>'+esc(nl.title)+'</b><small>새 수업 · '+esc(nl.sub)+'</small></span>'+I.go+'</button></li>'
+  rows+=nl?'<li><button type="button" class="row" data-lesson="'+nl.id+'">'+art(nl.id,"th")+'<span class="tx"><b>'+esc(nl.title)+'</b><small>새 수업 · '+esc(nl.sub)+'</small></span>'+I.go+'</button></li>'
     :up&&orderOf(up.id).length?'<li><button type="button" class="row" data-setlv="'+up.id+'"><span class="ic">'+I.go+'</span><span class="tx"><b>'+up.name+' 단계로 올라가기</b><small>이 단계 수업을 모두 마쳤어요</small></span>'+I.go+'</button></li>'
     :'<li><div class="row off"><span class="ic done">'+I.chk+'</span><span class="tx"><b>모든 수업 완료</b><small>복습과 AI 회화로 내 것으로 만들어요</small></span></div></li>';
   rows+='<li><button type="button" class="row" data-goto="talk"><span class="ic">'+I.chat+'</span><span class="tx"><b>AI 선생님과 회화</b><small>'+(relayReady()?(pl.talkLesson?"추천 주제 · "+esc(pl.talkLesson.topicKo):"자유 대화"):"연결하면 쓸 수 있어요")+'</small></span>'+I.go+'</button></li>';
@@ -52,6 +52,7 @@ function viewToday(){
   app.innerHTML='<p class="date">'+(d.getMonth()+1)+'월 '+d.getDate()+'일 '+DN[d.getDay()]+'요일 · '+lvName()+' 단계</p><h1 class="hero">'+hero+'</h1>'
    +'<div class="goal" role="img" aria-label="오늘 목표 '+pl.said+' / '+pl.goal+' 문장"><div class="goalbar"><i style="width:'+pl.pct+'%"></i></div><span>오늘 말한 문장 <b>'+pl.said+'</b> / '+pl.goal+'</span></div>'
    +'<ol class="week" aria-label="이번 주 연습한 날">'+week+'</ol>'
+   +(nl&&!pl.due?'<button type="button" class="feat" data-lesson="'+nl.id+'">'+art(nl.id)+'<span class="feat-t"><small>다음 수업</small><b>'+esc(nl.title)+'</b><span>'+esc(nl.goal)+'</span></span></button>':"")
    +'<h2 class="sec">오늘의 학습</h2><ul class="rows">'+rows+'</ul>'
    +(s?'<h2 class="sec">오늘의 문장</h2><div class="quote"><p class="q-en" lang="en">'+esc(s.en)+'</p><p class="q-ko">'+esc(s.ko)+'</p>'+(canSpeak()?'<button type="button" class="aud" data-say="'+esc(s.en)+'">'+I.spk+'듣기</button>':"")+'</div>':"")
    +(w?'<h2 class="sec">오늘의 단어</h2><div class="quote wordq"><span class="pic sm" aria-hidden="true">'+w.e+'</span><div><p class="q-en" lang="en">'+esc(w.w)+'</p><p class="q-ko">'+esc(w.ko)+(w.ex?' · <span lang="en">'+esc(w.ex)+'</span>':"")+'</p></div></div>':"")
@@ -69,7 +70,7 @@ function viewLessons(){
   unitsOf(b).forEach(u=>{
     h+='<h2 class="unit">'+esc(u.name)+'</h2><ul class="rows">'+u.ids.map(id=>{
       const l=lesson(id),dn=P.done[id];
-      return '<li><button type="button" class="row" data-lesson="'+id+'"><span class="ic em">'+l.e+'</span><span class="tx"><b>'+esc(l.title)+'</b><small>'+esc(l.grammar.point)+' · '+esc(l.sub)+'</small></span>'+(nl&&nl.id===id?'<span class="chip">다음 수업</span>':dn?'<span class="dn">'+I.chk+'</span>':I.go)+'</button></li>';
+      return '<li><button type="button" class="row" data-lesson="'+id+'">'+art(id,"th")+'<span class="tx"><b>'+esc(l.title)+'</b><small>'+esc(l.grammar.point)+' · '+esc(l.sub)+'</small></span>'+(nl&&nl.id===id?'<span class="chip">다음 수업</span>':dn?'<span class="dn">'+I.chk+'</span>':I.go)+'</button></li>';
     }).join("")+'</ul>';
   });
   if(!reviewed(b))h+='<p class="note">이 단계의 수업 내용은 AI가 작성하고 AI가 교차 검토했어요. 영어교육 전문가의 검수는 아직 받지 않았어요.</p>';

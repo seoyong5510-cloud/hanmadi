@@ -11,7 +11,7 @@ import {SR,listen,stop as stopSR,abort as abortSR,listening} from "../speech/sr.
 import {speak,stopSpeak} from "../speech/tts.js";
 import {sfx} from "../speech/sfx.js";
 import {relayReady,llmReady,health,caps,call,errorKo} from "../ai/relay.js";
-import {I} from "./icons.js";
+import {I,art} from "./icons.js";
 import {app,chrome,$,$$,ui,register,show,enter,onLeave,tabsHtml,bindTabs} from "./nav.js";
 
 const FREE=[
@@ -31,7 +31,7 @@ async function talkHome(){
   if(!caps.ok){box.innerHTML=setupHtml("AI 서버에 연결하지 못했어요",errorKo({code:caps.error}));return bindSetup();}
   if(!caps.llm){box.innerHTML=setupHtml("서버에 AI 키가 아직 없어요","서버 설정에 AI 키(LLM_API_KEY)를 넣으면 바로 쓸 수 있어요.");return bindSetup();}
   const ids=orderOf(P.level),done=ids.filter(id=>P.done[id]),rec=lesson(done[done.length-1]||ids[0]);
-  const row=(key,title,sub,em)=>'<li><button type="button" class="row" data-topic="'+key+'"><span class="ic em">'+em+'</span><span class="tx"><b>'+esc(title)+'</b><small>'+esc(sub)+'</small></span>'+I.go+'</button></li>';
+  const row=(key,title,sub,em)=>'<li><button type="button" class="row" data-topic="'+key+'">'+(lesson(key)?art(key,"th"):'<span class="ic">'+I.chat+'</span>')+'<span class="tx"><b>'+esc(title)+'</b><small>'+esc(sub)+'</small></span>'+I.go+'</button></li>';
   box.innerHTML='<p class="lead" style="margin:-8px 0 8px">주제를 고르면 AI 선생님이 먼저 말을 걸어요. 틀려도 괜찮아요. 중요한 것만 한두 개 고쳐 드려요.</p>'
    +(rec?'<h2 class="sec">추천</h2><ul class="rows">'+row(rec.id,rec.topicKo,"최근 배운 수업 · 역할극",rec.e)+'</ul>':"")
    +'<h2 class="sec">자유 대화</h2><ul class="rows">'+FREE.map(f=>row(f.id,f.title,"정해진 답 없이 편하게","💬")).join("")+'</ul>'
@@ -48,7 +48,7 @@ const bindSetup=()=>$("#toset").addEventListener("click",()=>show("set"));
 /* ---------- conversation ---------- */
 function startTalk(arg){
   const key=arg.topic||arg.lesson,l=lesson(key),f=FREE.find(x=>x.id===key)||FREE[0];
-  C={title:l?l.topicKo:f.title,role:l?l.role:f.role,history:[],items:[],t0:Date.now(),busy:false,state:"idle",turns:0,fixed:0,fixes:[],ended:false,auto:!!SR};
+  C={art:l?l.id:"",title:l?l.topicKo:f.title,role:l?l.role:f.role,history:[],items:[],t0:Date.now(),busy:false,state:"idle",turns:0,fixed:0,fixes:[],ended:false,auto:!!SR};
   enter("tutor");
   onLeave(()=>{if(C&&!C.ended){C.ended=true;addSecs((Date.now()-C.t0)/1000);save();}C=null;});
   drawTalk();
@@ -64,7 +64,7 @@ function setState(s){
   if(mic){mic.classList.toggle("on",s==="listening");mic.classList.toggle("wait",s==="thinking"||s==="speaking");mic.innerHTML=s==="speaking"?I.stop:I.mic;mic.setAttribute("aria-label",s==="speaking"?"말 끊고 내 차례로":STATE[s]);}
 }
 function drawTalk(){
-  app.innerHTML='<header class="sbar"><button type="button" class="x" id="quit" aria-label="그만하기">'+I.x+'</button><p class="ttitle">'+esc(C.title)+'</p><button type="button" class="endb" id="end">끝내기</button></header><main class="ex"><ol class="chat" id="chat" aria-live="polite"></ol></main>';
+  app.innerHTML='<header class="sbar"><button type="button" class="x" id="quit" aria-label="그만하기">'+I.x+'</button><div class="thead">'+(C.art?art(C.art,"av"):'<span class="av ic">'+I.chat+'</span>')+'<p class="ttitle"><small>AI 선생님과 회화</small>'+esc(C.title)+'</p></div><button type="button" class="endb" id="end">끝내기</button></header><main class="ex"><ol class="chat" id="chat" aria-live="polite"></ol></main>';
   chrome.innerHTML='<div class="dock fixed" id="dock"><p class="heard" id="heard"></p><div class="trow">'
    +'<button type="button" class="side" id="hintb" aria-label="힌트">'+I.bulb+'<span>힌트</span></button>'
    +(SR?'<button type="button" class="micbtn" id="tmic">'+I.mic+'</button>':"")
@@ -91,7 +91,7 @@ function add(item){
   const li=document.createElement("li");
   li.className="msg "+item.who;
   if(item.who==="ai"){
-    li.innerHTML='<p class="m-en" lang="en">'+esc(item.en)+'</p>'+(item.ko?'<button type="button" class="txt sm" data-r>뜻 보기</button><p class="m-ko" hidden>'+esc(item.ko)+'</p>':"")+'<button type="button" class="aud sm" data-replay>'+I.spk+'다시 듣기</button>';
+    li.innerHTML='<p class="who">AI 선생님</p><p class="m-en" lang="en">'+esc(item.en)+'</p>'+(item.ko?'<button type="button" class="txt sm" data-r>뜻 보기</button><p class="m-ko" hidden>'+esc(item.ko)+'</p>':"")+'<button type="button" class="aud sm" data-replay>'+I.spk+'다시 듣기</button>';
     const r=li.querySelector("[data-r]");
     if(r)r.addEventListener("click",()=>{r.nextElementSibling.hidden=false;r.hidden=true;});
     li.querySelector("[data-replay]").addEventListener("click",()=>{abortSR();speak(item.en);});

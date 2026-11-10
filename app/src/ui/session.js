@@ -10,7 +10,7 @@ import {speak,stopSpeak,canSpeak} from "../speech/tts.js";
 import {canRecord,startRecording} from "../speech/wav.js";
 import {sfx,confetti} from "../speech/sfx.js";
 import {llmReady,speechReady,call} from "../ai/relay.js";
-import {I} from "./icons.js";
+import {I,art} from "./icons.js";
 import {app,chrome,$,$$,register,show,open,enter,onLeave,fit} from "./nav.js";
 import {openPron} from "./pronui.js";
 
@@ -89,7 +89,7 @@ function showEx(){
   let m="",auto="";
   if(ex.t==="intro"){
     const l=ex.l;
-    m='<p class="inst">이번 수업</p>'+picH(l.e)+'<h1 class="koq">'+esc(l.title)+'</h1><p class="lead">'+esc(l.goal)+'</p>'
+    m='<p class="inst">이번 수업</p>'+art(l.id,"hero")+'<h1 class="koq">'+esc(l.title)+'</h1><p class="lead">'+esc(l.goal)+'</p>'
      +'<div class="ans"><p class="why" style="margin:0"><b>'+esc(l.grammar.point)+'</b></p><p class="ko">'+esc(l.grammar.note)+'</p></div>';
   }else if(ex.t==="learn"){
     if(M().blind&&canSpeak())m='<p class="inst">먼저 듣고, 들은 대로 말해요</p>'+playB(p.en)+hidden(p,"문장 보기",true);
