@@ -113,10 +113,12 @@ async function driveSession(page,mode){
       if(all("#app .opt").length){
         seen.push("choice");
         const play=q(".bigplay");
-        const want=play?findKo(play.dataset.say):findWord(q(".koq").innerText);
+        const findQ=t=>{for(const l of window.__t.all()){const x=l.listen&&l.listen.qs.find(x=>x.q===t);if(x)return x.o[0];}return null;};
+        const want=play?findKo(play.dataset.say):(findQ(q(".koq").innerText)||findWord(q(".koq").innerText));
         const opts=all("#app .opt").filter(o=>!o.disabled);
         if(mode==="badfirst"&&!missed[key]){missed[key]=1;const w=opts.find(o=>o.textContent!==want);if(w){w.click();continue;}}
-        const r=opts.find(o=>o.textContent===want);
+        let r=opts.find(o=>o.textContent===want);
+        if(!r&&!play){const ko=q(".koq").innerText;const ws=[];for(const l of window.__t.all())for(const w of l.words)if(w.ko===ko)ws.push(w.w);r=opts.find(o=>ws.includes(o.textContent));}
         if(!r)return {stuck:"no correct option for "+key,seen};
         r.click();continue;
       }
@@ -336,7 +338,7 @@ try{
   ok("no horizontal overflow on stats",await overflow(page)<=0);
   await page.click('[data-tab="lessons"]');
   await page.click('[data-seg="c1"]');
-  ok("all six levels are browsable; C1 lists lessons and the not-yet-reviewed notice",(await page.$$(".seg button")).length===6&&(await page.$$("[data-lesson]")).length===6&&(await txt(page,"#app")).includes("전문가의 검수는 아직"));
+  ok("all six levels are browsable; C1 lists lessons and the not-yet-reviewed notice",(await page.$$(".seg button")).length===6&&(await page.$$("[data-lesson]")).length>=6&&(await txt(page,"#app")).includes("전문가의 검수는 아직"));
   await page.screenshot({path:SHOTS+"/15-lessons-c1.png",fullPage:true});
   ok("no page errors (main flow)",errors.length===0,errors.join(" | "));
 
@@ -346,7 +348,7 @@ try{
   await page.context().close();
 
   /* 13. one lesson at each remaining level (level-specific behaviour) */
-  for(const [lv,id,frame] of [["a1","m7",""],["a1","p28",""],["a1","p44",""],["a2","q33",""],["a2","b1","Are you free this Saturday"],["a2p","d1",""],["b1","c1",""],["b2","e1",""],["c1","f1",""]]){
+  for(const [lv,id,frame] of [["a1","m7",""],["a1","p28",""],["a1","p44",""],["a2","q33",""],["a2p","r17",""],["b2","t02",""],["c1","u05",""],["a2","b1","Are you free this Saturday"],["a2p","d1",""],["b1","c1",""],["b2","e1",""],["c1","f1",""]]){
     ({page,errors}=await newPage({width:390,height:844},{"hanmadi-v2":JSON.stringify({v:2,level:lv,snd:false,mic:1})}));
     await page.evaluate(([id])=>{
       const l=window.__t.lesson(id);

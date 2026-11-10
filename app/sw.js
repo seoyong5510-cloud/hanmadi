@@ -1,12 +1,12 @@
 // Offline support: the app shell and lesson content are cached so lessons open without a network.
 // (Speech recognition and the AI teacher still need a connection.)
-const CACHE="hanmadi-app-v14";
+const CACHE="hanmadi-app-v15";
 const FILES=["./","index.html","styles.css","manifest.webmanifest","icon-192.png","icon-512.png",
  "content/a1.json","content/a2.json","content/a2p.json","content/b1.json","content/b2.json","content/c1.json",
  "src/main.js","src/core/util.js","src/core/levels.js","src/core/grade.js","src/core/store.js","src/core/content.js","src/core/srs.js","src/core/plan.js","src/core/placement.js",
  "src/speech/sr.js","src/speech/tts.js","src/speech/wav.js","src/speech/sfx.js","src/ai/relay.js",
  "src/ui/nav.js","src/ui/icons.js","src/ui/home.js","src/ui/session.js","src/ui/tutor.js","src/ui/pronui.js",
- "img/t1.webp","img/t2.webp","img/t3.webp","img/t4.webp","img/l1.webp","img/l2.webp","img/l10.webp","img/l3.webp","img/l5.webp","img/l6.webp","img/l4.webp","img/l7.webp","img/l8.webp","img/l9.webp","img/b1.webp","img/b2.webp","img/b3.webp","img/b4.webp","img/b5.webp","img/b6.webp","img/d1.webp","img/d2.webp","img/d3.webp","img/d4.webp","img/d5.webp","img/d6.webp","img/c1.webp","img/c2.webp","img/c3.webp","img/c4.webp","img/c5.webp","img/c6.webp","img/e1.webp","img/e2.webp","img/e3.webp","img/e4.webp","img/e5.webp","img/e6.webp","img/f1.webp","img/f2.webp","img/f3.webp","img/f4.webp","img/f5.webp","img/f6.webp"];
+ "img/t1.webp","img/t2.webp","img/t3.webp","img/t4.webp","img/p02.webp","img/p03.webp","img/p07.webp","img/m2.webp","img/l1.webp","img/l2.webp","img/l10.webp","img/l3.webp","img/l5.webp","img/l6.webp","img/l4.webp","img/l7.webp","img/l8.webp","img/l9.webp","img/b1.webp","img/b2.webp","img/b3.webp","img/b4.webp","img/b5.webp","img/b6.webp","img/d1.webp","img/d2.webp","img/d3.webp","img/d4.webp","img/d5.webp","img/d6.webp","img/c1.webp","img/c2.webp","img/c3.webp","img/c4.webp","img/c5.webp","img/c6.webp","img/e1.webp","img/e2.webp","img/e3.webp","img/e4.webp","img/e5.webp","img/e6.webp","img/f1.webp","img/f2.webp","img/f3.webp","img/f4.webp","img/f5.webp","img/f6.webp"];
 self.addEventListener("install",e=>{e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES.map(f=>new Request(f,{cache:"no-cache"})))).then(()=>self.skipWaiting()));});
 self.addEventListener("activate",e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==CACHE).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
 // Network first so updates show up at once; fall back to the cache when offline.

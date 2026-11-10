@@ -8,7 +8,7 @@ const data=loadAll();
 test("six levels, each with lessons",()=>{
   assert.equal(LEVELS.length,6);
   for(const lv of LEVELS){assert.ok(orderOf(lv.id).length>=6,lv.id);assert.ok(unitsOf(lv.id).length>=2,lv.id);}
-  assert.ok(allLessons().length>=90,String(allLessons().length));
+  assert.ok(allLessons().length>=150,String(allLessons().length));
   assert.equal(orderOf("a1").length,50);assert.equal(orderOf("a2").length,40);
 });
 test("lesson ids are unique across levels",()=>{
@@ -34,7 +34,7 @@ test("every lesson has the full teaching data",()=>{
     assert.equal(l.talk.map(t=>t.you).sort().join(""),"0123",`${T} talk`);
     for(const t of l.talk)assert.ok(typeof t.them==="string"&&t.ko,`${T} talk turn`);
     assert.equal(l.words.length,5,T);
-    for(const w of l.words){assert.match(w.w,/^[a-z]{2,12}$/,`${T} word ${w.w}`);assert.ok(w.ko&&w.e,`${T} word ${w.w}`);}
+    for(const w of l.words){assert.match(w.w,/^[a-z]{2,14}$/,`${T} word ${w.w}`);assert.ok(w.ko&&w.e,`${T} word ${w.w}`);}
     assert.equal(new Set(l.words.map(w=>w.w)).size,5,`${T} duplicate word in lesson`);
   }
 });

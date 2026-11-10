@@ -17,5 +17,5 @@ export const I={
 };
 
 // Lesson illustration (in app/img). Lessons that have no picture yet show their emoji in the same frame.
-const ART=new Set("l1 l2 l10 l3 l5 l6 l4 l7 l8 l9 b1 b2 b3 b4 b5 b6 d1 d2 d3 d4 d5 d6 c1 c2 c3 c4 c5 c6 e1 e2 e3 e4 e5 e6 f1 f2 f3 f4 f5 f6".split(" "));
+const ART=new Set("p02 p03 p07 m2 l1 l2 l10 l3 l5 l6 l4 l7 l8 l9 b1 b2 b3 b4 b5 b6 d1 d2 d3 d4 d5 d6 c1 c2 c3 c4 c5 c6 e1 e2 e3 e4 e5 e6 f1 f2 f3 f4 f5 f6".split(" "));
 export const art=(id,cls,emoji)=>ART.has(id)?'<img class="art '+(cls||"")+'" src="img/'+id+'.webp" alt="" width="440" height="440" decoding="async">':'<span class="art emo '+(cls||"")+'" aria-hidden="true">'+(emoji||"")+'</span>';
