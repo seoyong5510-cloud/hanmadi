@@ -6,6 +6,8 @@
 import http from "node:http";
 import fs from "node:fs";
 import crypto from "node:crypto";
+import {spawn} from "node:child_process";
+import {fileURLToPath} from "node:url";
 import worker from "./worker.js";
 const here=new URL(".",import.meta.url);
 const cfgPath=new URL("local-config.json",here);
@@ -53,4 +55,24 @@ server.listen(cfg.port,cfg.host,async()=>{
   console.log("  AI 모델: "+cfg.model+(st.up?(st.hasModel?"  (준비됨)":"  (아직 없음 → 다른 창에서: ollama pull "+cfg.model+")"):"  (Ollama 가 꺼져 있어요. Ollama 를 실행해 주세요)"));
   console.log("이 창을 닫으면 AI 서버가 꺼져요.");
 });
+// Phone connection: if cloudflared.exe sits next to this file, open a tunnel (hidden, no window) and
+// write the current address + access code to a text file so it is easy to find.
+function startTunnel(){
+  const exe=fileURLToPath(new URL("cloudflared.exe",here)),note=fileURLToPath(new URL("휴대폰 주소.txt",here));
+  if(cfg.tunnel===false||!fs.existsSync(exe))return;
+  try{fs.writeFileSync(note,"휴대폰 연결을 여는 중이에요. 잠시 뒤 다시 열어 보세요.\r\n");}catch(e){}
+  const child=spawn(exe,["tunnel","--no-autoupdate","--url","http://127.0.0.1:"+cfg.port],{windowsHide:true,stdio:["ignore","pipe","pipe"]});
+  let found=false;
+  const onData=d=>{
+    const m=String(d).match(/https:\/\/[a-z0-9-]+\.trycloudflare\.com/);
+    if(m&&!found){found=true;
+      try{fs.writeFileSync(note,"한마디 영어 앱 > 설정 > AI 연결에 넣으세요.\r\n\r\n서버 주소: "+m[0]+"\r\n접속 암호: "+cfg.token+"\r\n\r\n(PC를 다시 켜면 서버 주소가 바뀌어요. 그때 이 파일을 다시 열어 보세요.)\r\n만든 시각: "+new Date().toLocaleString("ko-KR")+"\r\n");}catch(e){}
+      console.log("  휴대폰용 주소: "+m[0]);}
+  };
+  child.stdout.on("data",onData);child.stderr.on("data",onData);
+  child.on("exit",()=>{try{fs.writeFileSync(note,"휴대폰 연결이 꺼져 있어요. 'AI 켜기'를 다시 실행해 주세요.\r\n");}catch(e){}});
+  const stop=()=>{try{child.kill();}catch(e){}};
+  process.on("exit",stop);process.on("SIGINT",()=>{stop();process.exit(0);});process.on("SIGTERM",()=>{stop();process.exit(0);});
+}
+server.on("listening",startTunnel);
 server.on("error",e=>{console.log(e.code==="EADDRINUSE"?"이미 AI 서버가 켜져 있어요 (포트 "+cfg.port+").":"서버 오류: "+e.message);process.exitCode=1;});
