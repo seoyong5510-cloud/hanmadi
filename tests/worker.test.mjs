@@ -120,3 +120,39 @@ test("helpers",()=>{
   const w=new DataView(encodeWav(new Float32Array([0,1,-1]),16000));
   assert.equal(w.byteLength,50);assert.equal(w.getUint32(24,true),16000);assert.equal(w.getInt16(46,true),32767);assert.equal(w.getInt16(48,true),-32768);
 });
+
+test("each person uses only their own keys and code; the owner's keys are never used for them",async()=>{
+  const env2=Object.assign({},env,{USERS:JSON.stringify({"minsu-code":{name:"민수",llm_key:"friend-key",llm_provider:"openai",llm_base_url:"https://friend.example/v1",llm_model:"m"},"nokey-code":{name:"지수"},"shared-code":{name:"아내",share:true}})});
+  const call=(token,path="/v1/judge")=>worker.fetch(new Request("https://relay.test"+path,{method:path==="/v1/health"?"GET":"POST",headers:{"content-type":"application/json","x-app-token":token},body:path==="/v1/health"?undefined:JSON.stringify({target:"a",said:"a",ko:"가"})}),env2);
+  mock(url=>url.includes("friend.example")?new Response(JSON.stringify({choices:[{message:{content:'{"ok":true,"natural":true,"fix":"","why_ko":"좋아요."}'}}],usage:{prompt_tokens:1,completion_tokens:1}}),{status:200}):anthropic('{"ok":true,"natural":true,"fix":"","why_ko":"좋아요."}'));
+  assert.equal((await call("minsu-code")).status,200);
+  assert.ok(calls[0].url.startsWith("https://friend.example/v1"));
+  assert.equal(calls[0].init.headers.authorization||calls[0].init.headers.Authorization,"Bearer friend-key");
+  assert.ok(!JSON.stringify(calls[0].init.headers).includes('"k"'));
+  const h=await (await call("minsu-code","/v1/health")).json();
+  assert.deepEqual([h.user,h.llm,h.speech],["민수",true,false]);
+  // a person with no keys of their own gets nothing from the owner
+  calls=[];
+  const r=await call("nokey-code");
+  assert.equal(r.status,503);assert.equal((await r.json()).error,"llm_not_configured");assert.equal(calls.length,0);
+  // explicit sharing uses the owner's keys
+  assert.equal((await call("shared-code")).status,200);
+  assert.ok(calls[0].url.includes("api.anthropic.com"));
+  // unknown codes and object-prototype names are rejected
+  assert.equal((await call("someone-else")).status,401);
+  assert.equal((await call("constructor")).status,401);
+  assert.equal((await call("code")).status,200);
+});
+test("daily cap per person is enforced when usage storage is bound, and does not affect others",async()=>{
+  const store=new Map(),USAGE={get:async k=>store.get(k)||null,put:async(k,v)=>{store.set(k,v);}};
+  const env2=Object.assign({},env,{USAGE,USERS:JSON.stringify({"a-code":{name:"A",share:true,daily:2},"b-code":{name:"B",share:true,daily:2}})});
+  const call=token=>worker.fetch(new Request("https://relay.test/v1/judge",{method:"POST",headers:{"content-type":"application/json","x-app-token":token},body:JSON.stringify({target:"a",said:"a",ko:"가"})}),env2);
+  mock(()=>anthropic('{"ok":true,"natural":true,"fix":"","why_ko":"좋아요."}'));
+  assert.equal((await call("a-code")).status,200);
+  assert.equal((await call("a-code")).status,200);
+  const r=await call("a-code");
+  assert.equal(r.status,429);assert.equal((await r.json()).error,"daily_limit");
+  assert.equal(calls.length,2);
+  assert.equal((await call("b-code")).status,200);
+  assert.equal((await call("code")).status,200);
+});

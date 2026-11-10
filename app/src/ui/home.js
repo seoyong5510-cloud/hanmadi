@@ -111,7 +111,7 @@ function viewSettings(){
    +'<div class="setrow" style="margin-top:0"><span>하루 목표</span><span class="seg mini">'+[5,10,20,30].map(n=>'<button type="button" data-goal="'+n+'" class="'+(P.goal===n?"on":"")+'">'+n+'</button>').join("")+'</span></div>'
    +'<button type="button" class="setrow" id="snd" style="margin-top:0" role="switch" aria-checked="'+(!!P.snd)+'"><span>효과음</span><span class="sw'+(P.snd?" on":"")+'"></span></button>'
    +'<h2 class="sec">AI 연결</h2><p class="note" style="margin-top:0">AI 선생님, 자연스러운 음성, 발음 평가는 내 전용 서버를 거쳐 동작해요. 서버 주소와 접속 암호를 넣어 주세요. 상태: <b id="aistat">'+esc(status)+'</b>'
-   +(caps.ok?'<br>AI 대화 '+(caps.llm?"사용 가능"+(caps.model?" ("+esc(caps.model)+")":""):"키 없음")+' · 음성·발음 평가 '+(caps.speech?"사용 가능":"키 없음"):"")+'</p>'
+   +(caps.ok?'<br>AI 대화 '+(caps.llm?"사용 가능"+(caps.model?" ("+esc(caps.model)+")":""):"키 없음")+' · 음성·발음 평가 '+(caps.speech?"사용 가능":"키 없음")+(caps.user?'<br>'+esc(caps.user)+' 님 전용 연결'+(caps.daily?' · 하루 AI '+caps.daily+'회까지':''):""):"")+'</p>'
    +'<form class="aiform" id="aiform"><label for="aiurl">서버 주소</label><input id="aiurl" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://….workers.dev" value="'+esc(P.ai.url)+'">'
    +'<label for="aitoken">접속 암호</label><input id="aitoken" type="password" autocomplete="off" value="'+esc(P.ai.token)+'"><button type="submit" class="cta dark">저장하고 연결 확인</button></form>'
    +'<h2 class="sec">이번 달 AI 사용량</h2><div class="three">'+'<div><b>'+m.turns+'</b><span>대화 턴</span></div><div><b>'+(m.tokensIn+m.tokensOut).toLocaleString()+'</b><span>토큰</span></div><div><b>'+m.pronSeconds+'초</b><span>발음 평가</span></div></div>'

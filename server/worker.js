@@ -12,6 +12,16 @@
 //   AZURE_SPEECH_REGION  text    e.g. "koreacentral"
 //   TTS_VOICE            text    optional, default "en-US-JennyNeural"
 //   ALLOW_ORIGIN         text    optional, comma-separated origins allowed to call (default "*")
+//
+// Giving the app to other people, kept separate from the owner:
+//   USERS                secret  optional JSON, one entry per person, keyed by that person's own access code:
+//                                {"friend-code-1":{"name":"민수","llm_key":"<their own AI key>","llm_provider":"openai",
+//                                  "llm_base_url":"...","llm_model":"...","speech_key":"...","speech_region":"koreacentral","daily":80}}
+//                                A person uses ONLY the keys in their own entry, so their usage never touches the
+//                                owner's quota or bill. Add "share":true to let that person use the owner's keys instead.
+//                                Removing an entry cuts that person off without changing anyone else's code.
+//   USAGE                KV      optional KV namespace binding. When bound, "daily" (AI requests per day) is enforced
+//                                per person; without it "daily" is ignored.
 
 const TAGS=["past-tense","tense","article","preposition","word-choice","word-order","plural","subject-verb","other"];
 const LEVEL_RULES={
@@ -182,6 +192,28 @@ async function pron(env,req,url){
   return Object.assign(mapPron(j),{usage:{seconds:Math.round(seconds*10)/10}});
 }
 
+// Who is calling: the owner (APP_TOKEN) or a person listed in USERS. Returns the settings that person may use.
+export function resolveUser(env,token){
+  if(!token)return null;
+  if(env.APP_TOKEN&&token===env.APP_TOKEN)return {id:"owner",name:"",env,daily:0};
+  let users={};
+  try{users=env.USERS?(typeof env.USERS==="string"?JSON.parse(env.USERS):env.USERS):{};}catch(e){users={};}
+  const u=Object.prototype.hasOwnProperty.call(users,token)?users[token]:null;
+  if(!u||typeof u!=="object")return null;
+  const own=u.share===true?Object.assign({},env):Object.assign({},env,{LLM_API_KEY:"",AZURE_SPEECH_KEY:""});
+  if(u.llm_key)Object.assign(own,{LLM_API_KEY:u.llm_key,LLM_PROVIDER:u.llm_provider||"anthropic",LLM_MODEL:u.llm_model||"",LLM_BASE_URL:u.llm_base_url||"",PRICE_IN:u.price_in||"",PRICE_OUT:u.price_out||""});
+  if(u.speech_key)Object.assign(own,{AZURE_SPEECH_KEY:u.speech_key,AZURE_SPEECH_REGION:u.speech_region||env.AZURE_SPEECH_REGION||""});
+  return {id:"u:"+clip(u.name||"friend",40),name:clip(u.name||"",40),env:own,daily:Math.max(0,parseInt(u.daily,10)||0)};
+}
+// Per-person daily cap on AI requests (only when a KV namespace is bound as USAGE).
+async function countDaily(env,who){
+  if(!who.daily||!env.USAGE)return;
+  const key="d:"+who.id+":"+new Date().toISOString().slice(0,10);
+  const n=parseInt(await env.USAGE.get(key),10)||0;
+  if(n>=who.daily)throw new Fail("daily_limit",429,"daily limit reached");
+  await env.USAGE.put(key,String(n+1),{expirationTtl:172800});
+}
+
 export default {
   async fetch(req,env){
     env=env||{};
@@ -193,10 +225,14 @@ export default {
     try{
       const url=new URL(req.url),path=url.pathname.replace(/\/+$/,"");
       if(!env.APP_TOKEN)throw new Fail("not_configured",500,"APP_TOKEN is not set on the server");
-      if(req.headers.get("x-app-token")!==env.APP_TOKEN)throw new Fail("unauthorized",401);
+      const who=resolveUser(env,req.headers.get("x-app-token"));
+      if(!who)throw new Fail("unauthorized",401);
+      const base=env;
+      env=who.env;
       if(req.method==="GET"&&path==="/v1/health")
-        return json({ok:true,llm:!!env.LLM_API_KEY,speech:!!(env.AZURE_SPEECH_KEY&&env.AZURE_SPEECH_REGION),provider:(env.LLM_PROVIDER||"anthropic").toLowerCase(),model:env.LLM_MODEL||""});
+        return json({ok:true,llm:!!env.LLM_API_KEY,speech:!!(env.AZURE_SPEECH_KEY&&env.AZURE_SPEECH_REGION),provider:(env.LLM_PROVIDER||"anthropic").toLowerCase(),model:env.LLM_MODEL||"",user:who.name,daily:who.daily&&base.USAGE?who.daily:0});
       if(req.method!=="POST")throw new Fail("not_found",404);
+      if(path==="/v1/turn"||path==="/v1/report"||path==="/v1/judge")await countDaily(base,who);
       if(path==="/v1/pron")return json(await pron(env,req,url));
       let body;
       try{body=await req.json();}catch(e){throw new Fail("bad_request",400,"JSON body required");}
