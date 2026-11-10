@@ -44,9 +44,11 @@ function startLesson(id){
   shuffle(l.ph).forEach(p=>q.push({t:"recall",p,en:p.en}));
   ws.forEach(wd=>q.push({t:"spell",wd,hard:M().spell!=="tiles"}));
   q.push({t:"frame",l});
-  l.pat.items.forEach(p=>q.push({t:"pat",p,en:p.en,l}));
+  // apply the pattern: the three core fillers plus the extra ones (when the lesson has them)
+  const applied=l.pat.items.concat(l.pat.more||[]);
+  applied.forEach(p=>q.push({t:"pat",p,en:p.en,l}));
   // the same new sentences again, now from Korean only and in a different order
-  shuffle(l.pat.items).forEach(p=>q.push({t:"recall",p,en:p.en,apply:true}));
+  shuffle(applied).slice(0,5).forEach(p=>q.push({t:"recall",p,en:p.en,apply:true}));
   q.push({t:"free",l});
   // mix in two older sentences so earlier lessons are not forgotten
   Object.keys(P.cards).filter(k=>k.split(":")[0]!==id&&!k.includes(":w")&&cardData(k))
@@ -55,7 +57,7 @@ function startLesson(id){
   l.talk.forEach(tk=>q.push({t:"talk",tk,p:l.ph[tk.you],en:l.ph[tk.you].en,l}));
   // last round: every new sentence once more from memory, so each one is retrieved several times
   // with other work in between (repeated spaced retrieval is what makes it stick)
-  shuffle(l.ph.concat(l.pat.items)).forEach(p=>q.push({t:"recall",p,en:p.en,last:true}));
+  shuffle(l.ph.concat(shuffle(applied).slice(0,4))).forEach(p=>q.push({t:"recall",p,en:p.en,last:true}));
   begin({kind:"lesson",id,q});
 }
 function startReview(){
@@ -108,7 +110,7 @@ function showEx(){
     else if(ex.s===2)m='<div class="tcard">'+T(2)+'<div class="tbub"><small>오늘의 핵심</small><p class="tpoint" lang="en">'+esc(l.grammar.point)+'</p><p>'+esc(l.grammar.note)+'</p></div>'
       +'<div class="tbub alt"><small>이렇게 바꿔 써요</small><p class="tframe" lang="en">'+frameH(l)+'</p><p class="tsub">'+l.pat.items.map(x=>'<span lang="en">'+esc(x.w)+'</span> '+esc(x.wk)).join(" · ")+'</p></div></div>';
     else m='<div class="tcard">'+T(3,"sm")+'<div class="tbub"><small>오늘 말할 네 문장</small><ol class="tlist">'+l.ph.map(p=>'<li><b lang="en">'+esc(p.en)+'</b><span>'+esc(p.ko)+'</span></li>').join("")+'</ol><p class="tsub">지금 외우지 않아도 돼요. 여러 번 말하다 보면 입에 붙어요.</p></div></div>';
-    if(DEVICE_TTS)m+='<button type="button" class="aud tsay" id="tsay">'+I.spk+'선생님 설명 다시 듣기</button>';
+    if(DEVICE_TTS&&P.tread===true)m+='<button type="button" class="aud tsay" id="tsay">'+I.spk+'선생님 설명 다시 듣기</button>';
   }else if(ex.t==="learn"){
     if(M().blind&&canSpeak())m='<p class="inst">먼저 듣고, 들은 대로 말해요</p>'+playB(p.en)+hidden(p,"문장 보기",true);
     else m='<p class="inst">듣고 따라 말해요</p>'+picH(p.e)+'<h1 class="en" lang="en">'+esc(p.en)+'</h1>'+(M().say&&p.say?'<p class="say">'+esc(p.say)+'</p>':"")+'<p class="ko">'+esc(p.ko)+'</p>'+(p.note?'<p class="why">'+esc(p.note)+'</p>':"")+gramH(p.en)+auds(p.en)+tipsHtml(p.en);
@@ -134,7 +136,7 @@ function showEx(){
     m='<p class="inst">'+(ex.last?"마지막 확인! 3초 안에 떠올려 말해 봐요":ex.apply?"방금 만든 문장이에요. 안 보고 말해요":ex.old?"지난 수업 문장이에요. 기억나는 대로 말해요":p.mx?"전에 고친 문장이에요. 바르게 말해 봐요":S.kind==="review"?"기억나는 대로 영어로 말해요":"이번엔 안 보고 영어로 말해요")+'</p>'+picH(p.e)+'<h1 class="koq">'+esc(p.ko)+'</h1>'+hidden(p);
   }else if(ex.t==="frame"){
     m='<p class="inst">단어만 바꾸면 새 문장이 돼요</p><h1 class="frame" lang="en">'+frameH(ex.l)+'</h1><ul class="swap">'
-     +ex.l.pat.items.map(x=>'<li><b lang="en">'+esc(x.w)+'</b><span>'+esc(x.wk)+'</span></li>').join("")+'</ul>'+(ex.l.pat.note?'<p class="note">'+esc(ex.l.pat.note)+'</p>':"");
+     +ex.l.pat.items.concat(ex.l.pat.more||[]).map(x=>'<li><b lang="en">'+esc(x.w)+'</b><span>'+esc(x.wk)+'</span></li>').join("")+'</ul>'+(ex.l.pat.note?'<p class="note">'+esc(ex.l.pat.note)+'</p>':"");
   }else if(ex.t==="pat"){
     m='<p class="inst">빈칸에 넣어 말해요</p><h1 class="koq">'+esc(p.ko)+'</h1><p class="say" lang="en">'+frameH(ex.l)+'</p><span class="word">'+esc(p.wk)+' = '+esc(p.w)+'</span>'+hidden(p);
   }else if(ex.t==="free"){
@@ -160,7 +162,7 @@ function showEx(){
   else if(ex.t==="build")dockBuild(ex);
   else if(ex.t==="frame"||ex.t==="intro"){
     $("#dock").innerHTML='<button type="button" class="cta" id="nx">'+(ex.t==="intro"?(ex.s<3?"다음":"시작하기"):"말해 볼게요")+'</button>';
-    if(ex.t==="intro"){const b=$("#tsay");if(b)b.addEventListener("click",()=>speakKo(ex.voice));if(P.tvoice!==false)speakKo(ex.voice);}
+    if(ex.t==="intro"){const b=$("#tsay");if(b)b.addEventListener("click",()=>speakKo(ex.voice));if(P.tread===true)speakKo(ex.voice);}
     $("#nx").addEventListener("click",next);
   }else dockMic(ex);
   fit();

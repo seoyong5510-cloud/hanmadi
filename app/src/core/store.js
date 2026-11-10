@@ -6,7 +6,7 @@ export const KEY="hanmadi-v2";
 export const OLD_KEY="hanmadi-progress";
 export const P={};
 const blank=()=>({v:2,level:"",done:{},days:{},secs:{},cards:{},mistakes:{},weak:{},pron:[],talks:[],usage:[],
-  turns:{n:0,fixed:0},ai:{url:"",token:""},snd:true,tvoice:true,mic:0,goal:10,migrated:false});
+  turns:{n:0,fixed:0},ai:{url:"",token:""},snd:true,tread:false,mic:0,goal:10,migrated:false});
 const isObj=x=>x&&typeof x==="object"&&!Array.isArray(x);
 const numMap=o=>{const r={};if(isObj(o))for(const k in o){const v=Number(o[k]);if(Number.isFinite(v)&&v>=0)r[k]=v;}return r;};
 function cleanCards(o){
@@ -28,7 +28,7 @@ export function sanitize(o){
   if(Array.isArray(o.usage))p.usage=o.usage.filter(isObj).slice(-3000);
   if(isObj(o.turns))p.turns={n:Number(o.turns.n)||0,fixed:Number(o.turns.fixed)||0};
   if(isObj(o.ai))p.ai={url:String(o.ai.url||"").replace(/\/+$/,""),token:String(o.ai.token||"")};
-  p.snd=o.snd!==false;p.tvoice=o.tvoice!==false;p.mic=o.mic?1:0;
+  p.snd=o.snd!==false;p.tread=o.tread===true;p.mic=o.mic?1:0;
   p.goal=[5,10,20,30].includes(o.goal)?o.goal:10;
   p.migrated=!!o.migrated;
   return p;
