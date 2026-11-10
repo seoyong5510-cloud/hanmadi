@@ -37,6 +37,8 @@ function startLesson(id){
       q.push({t:"listen",say:tk.them,ans:tk.ko,fbA:tk.them,fbB:tk.ko,opts:shuffle([tk.ko].concat(shuffle(th.filter(x=>x!==tk)).slice(0,2).map(x=>x.ko)))});
     }
   }
+  // word-order building: makes English word order explicit before recalling from memory
+  shuffle(l.ph.filter(p=>p.en.split(/\s+/).length>=3)).slice(0,2).forEach(p=>q.push({t:"build",p,en:p.en,l}));
   shuffle(l.ph).forEach(p=>q.push({t:"recall",p,en:p.en}));
   ws.forEach(wd=>q.push({t:"spell",wd,hard:M().spell!=="tiles"}));
   q.push({t:"frame",l});
@@ -47,6 +49,9 @@ function startLesson(id){
     .sort((a,b)=>P.cards[a].due<P.cards[b].due?-1:P.cards[a].due>P.cards[b].due?1:0).slice(0,2)
     .forEach(k=>{const p=cardData(k);q.push({t:"recall",p,en:p.en,card:k,old:true});});
   l.talk.forEach(tk=>q.push({t:"talk",tk,p:l.ph[tk.you],en:l.ph[tk.you].en,l}));
+  // last round: every new sentence once more from memory, so each one is retrieved several times
+  // with other work in between (repeated spaced retrieval is what makes it stick)
+  shuffle(l.ph).forEach(p=>q.push({t:"recall",p,en:p.en,last:true}));
   begin({kind:"lesson",id,q});
 }
 function startReview(){
@@ -102,6 +107,8 @@ function showEx(){
   }else if(ex.t==="spell"){
     m='<p class="inst">글자를 순서대로 눌러 단어를 써요</p>'+picH(ex.wd.e)+'<h1 class="koq">'+esc(ex.wd.ko)+'</h1>'
      +'<div class="slots" lang="en">'+ex.wd.w.split("").map(()=>'<span class="slot"></span>').join("")+'</div>';
+  }else if(ex.t==="build"){
+    m='<p class="inst">단어를 순서대로 눌러 문장을 만들어요</p><h1 class="koq">'+esc(p.ko)+'</h1><div class="built" id="built" lang="en" aria-live="polite"></div>';
   }else if(ex.t==="listen"){
     m='<p class="inst">잘 듣고 뜻을 골라요</p>'+playB(ex.say)+optsH(ex,false);
     auto=ex.say;
@@ -109,7 +116,7 @@ function showEx(){
     m='<p class="inst">듣고 그대로 말해요</p>'+playB(p.en)+hidden(p,"문장 보기",true);
     auto=p.en;
   }else if(ex.t==="recall"){
-    m='<p class="inst">'+(ex.old?"지난 수업 문장이에요. 기억나는 대로 말해요":p.mx?"전에 고친 문장이에요. 바르게 말해 봐요":S.kind==="review"?"기억나는 대로 영어로 말해요":"이번엔 안 보고 영어로 말해요")+'</p>'+picH(p.e)+'<h1 class="koq">'+esc(p.ko)+'</h1>'+hidden(p);
+    m='<p class="inst">'+(ex.last?"마지막 확인! 바로 떠올려 말해 봐요":ex.old?"지난 수업 문장이에요. 기억나는 대로 말해요":p.mx?"전에 고친 문장이에요. 바르게 말해 봐요":S.kind==="review"?"기억나는 대로 영어로 말해요":"이번엔 안 보고 영어로 말해요")+'</p>'+picH(p.e)+'<h1 class="koq">'+esc(p.ko)+'</h1>'+hidden(p);
   }else if(ex.t==="frame"){
     m='<p class="inst">단어만 바꾸면 새 문장이 돼요</p><h1 class="frame" lang="en">'+frameH(ex.l)+'</h1><ul class="swap">'
      +ex.l.pat.items.map(x=>'<li><b lang="en">'+esc(x.w)+'</b><span>'+esc(x.wk)+'</span></li>').join("")+'</ul>'+(ex.l.pat.note?'<p class="note">'+esc(ex.l.pat.note)+'</p>':"");
@@ -135,6 +142,7 @@ function showEx(){
   if(hb)hb.addEventListener("click",()=>{S.hint=true;reveal();});
   if(ex.t==="listen"||ex.t==="pic")bindChoice(ex);
   else if(ex.t==="spell")dockSpell(ex);
+  else if(ex.t==="build")dockBuild(ex);
   else if(ex.t==="frame"||ex.t==="intro"){
     $("#dock").innerHTML='<button type="button" class="cta" id="nx">'+(ex.t==="intro"?"시작하기":"말해 볼게요")+'</button>';
     $("#nx").addEventListener("click",next);
@@ -206,6 +214,35 @@ function dockSpell(ex){
     slots[pos].textContent=w[pos];slots[pos].classList.add("on");b.disabled=true;pos++;sfx("tap");
     if(pos===w.length)done();
   }));
+}
+
+// Build the sentence by tapping word tiles in order. One extra word from another sentence is mixed in.
+function dockBuild(ex){
+  const words=ex.en.replace(/[.,!?]/g,"").split(/\s+/),dock=$("#dock"),built=$("#built");
+  const low=w=>w.toLowerCase();
+  const others=[].concat(...ex.l.ph.filter(p=>p!==ex.p).map(p=>p.en.replace(/[.,!?]/g,"").split(/\s+/))).filter(w=>!words.map(low).includes(low(w)));
+  let tiles=words.concat(shuffle(others).slice(0,1)).map((w,i)=>i===0?w:(w==="I"||/^I'/.test(w)||/^[A-Z][a-z]+$/.test(w)&&i>=words.length?w:w));
+  let sh=shuffle(tiles);
+  if(sh.slice(0,words.length).join(" ")===words.join(" "))sh=sh.reverse();
+  let pos=0,miss=0;
+  dock.className="dock fixed";
+  dock.innerHTML='<div class="tiles wtiles" lang="en">'+sh.map(w=>'<button type="button" class="tile wtile">'+esc(w)+'</button>').join("")+'</div>';
+  $$(".tile",dock).forEach(b=>b.addEventListener("click",()=>{
+    if(low(b.textContent)!==low(words[pos])){
+      miss++;b.classList.remove("bad");void b.offsetWidth;b.classList.add("bad");sfx("miss");
+      setTimeout(()=>b.classList.remove("bad"),350);
+      return;
+    }
+    built.textContent=words.slice(0,pos+1).join(" ");b.disabled=true;pos++;sfx("tap");
+    if(pos<words.length)return;
+    built.textContent=ex.en;built.classList.add("on");
+    save();sfx(miss?"ok":"perfect");speak(ex.en);
+    dock.className="dock fixed ok";
+    dock.innerHTML='<div class="fb" role="status"><p class="fb-t">'+(miss?"완성했어요":"한 번에 만들었어요")+'</p><p class="words" lang="en">'+esc(ex.en)+'</p><p class="sub">'+esc(ex.p.ko)+'</p>'+gramH(ex.en,true)+'<button type="button" class="cta" id="nx">다음</button></div>';
+    $("#nx").addEventListener("click",next);
+    fit();
+  }));
+  fit();
 }
 
 /* ---------- speaking ---------- */

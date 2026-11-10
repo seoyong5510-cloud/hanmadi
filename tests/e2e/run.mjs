@@ -120,6 +120,15 @@ async function driveSession(page,mode){
         if(!r)return {stuck:"no correct option for "+key,seen};
         r.click();continue;
       }
+      if(q("#built")&&!q("#dock .fb")){
+        seen.push("build");
+        const all2=()=>[...document.querySelectorAll("#dock .wtile")].filter(b=>!b.disabled);
+        if(mode==="badfirst"&&!missed[key]){missed[key]=1;all2()[0].click();await sleep(10);}
+        let g2=0;
+        while(!q("#dock .fb")&&g2++<200){for(const b of all2()){b.click();if(b.disabled)break;}await sleep(5);}
+        if(!q("#dock .fb"))return {stuck:"build "+key,seen};
+        continue;
+      }
       if(all(".slot").length&&!q("#dock .fb")){
         seen.push("spell");
         const w=findWord(q(".koq").innerText);if(!w)return {stuck:"word not found "+key,seen};
@@ -185,7 +194,7 @@ try{
   await page.evaluate(()=>{window.__frame=()=>"I like fishing";});
   let r=await driveSession(page,"badfirst");
   ok("A1 lesson completes with wrong-then-right answers",r.done===true,JSON.stringify(r).slice(0,300));
-  ok("lesson used choice, spelling and speaking exercises",["choice","spell","speak"].every(k=>r.seen.includes(k)));
+  ok("lesson used choice, spelling and speaking exercises",["choice","spell","speak","build"].every(k=>r.seen.includes(k)));
   await page.screenshot({path:SHOTS+"/06-lesson-done.png"});
   let st=await page.evaluate(()=>{const P=window.__t.P;return {done:P.done.l2,cards:Object.keys(P.cards).length,secs:Object.values(P.secs).reduce((a,b)=>a+b,0),said:Object.values(P.days).reduce((a,b)=>a+b,0)};});
   ok("lesson recorded: done, 24 cards, spoken count grew, time tracked",st.done===true&&st.cards===24&&st.said>15&&st.secs>=1,JSON.stringify(st));
