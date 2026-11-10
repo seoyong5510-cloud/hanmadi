@@ -46,3 +46,25 @@ export async function speak(text,rate){
     }catch(e){res();}
   });
 }
+
+// The teacher's Korean explanation, read aloud with the phone's own Korean voice. English words inside
+// quotes or Latin letters are read by an English voice so they are not mangled. Resolves when done.
+export async function speakKo(text){
+  if(!text||!DEVICE_TTS)return;
+  stopSpeak();
+  const mine=token;
+  const parts=String(text).split(/([A-Za-z][A-Za-z0-9' ,.?!~+\/-]*[A-Za-z?.!])/).map(s=>s.trim()).filter(Boolean);
+  for(const part of parts){
+    if(mine!==token)return;
+    const en=/^[A-Za-z]/.test(part);
+    await new Promise(res=>{
+      try{
+        const u=new SpeechSynthesisUtterance(en?part.replace(/[~+\/]/g," "):part);
+        u.lang=en?"en-US":"ko-KR";u.rate=en?0.9:1;
+        u.onend=res;u.onerror=res;
+        speechSynthesis.speak(u);
+        setTimeout(res,Math.max(4000,part.length*(en?140:260)));
+      }catch(e){res();}
+    });
+  }
+}

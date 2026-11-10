@@ -369,3 +369,5 @@ details.gram{margin:8px 0 4px;padding:10px 14px}
 .tlist b{font-size:17px}
 .tlist span{font-size:14px;color:var(--sub)}
 .tframe u{text-decoration:none;display:inline-block;min-width:54px;border-bottom:4px solid var(--brand)}
+.tsay{justify-self:start}
+.fin-t{width:132px;height:132px;aspect-ratio:1;border-radius:50%;object-position:50% 18%;margin:0 auto 12px}

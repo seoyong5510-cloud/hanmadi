@@ -6,7 +6,7 @@ import {gradeBest,gradeFrame,tipsFor} from "../core/grade.js";
 import {grow,addCards,dueKeys,streak} from "../core/srs.js";
 import {today,plusDays,shuffle,esc} from "../core/util.js";
 import {SR,listen,stop as stopSR,abort as abortSR,listening} from "../speech/sr.js";
-import {speak,stopSpeak,canSpeak} from "../speech/tts.js";
+import {speak,speakKo,stopSpeak,canSpeak,DEVICE_TTS} from "../speech/tts.js";
 import {canRecord,startRecording} from "../speech/wav.js";
 import {sfx,confetti} from "../speech/sfx.js";
 import {llmReady,speechReady,call} from "../ai/relay.js";
@@ -100,10 +100,15 @@ function showEx(){
   let m="",auto="";
   if(ex.t==="intro"){
     const l=ex.l,T=(n,cls)=>'<img class="tch '+(cls||"")+'" src="img/t'+n+'.webp" alt="선생님" width="540" height="540">';
+    const voice=ex.s===1?"안녕하세요! 오늘은 "+l.title+" 수업이에요. "+l.goal+" 먼저 핵심부터 짚고 갈게요."
+      :ex.s===2?"오늘의 핵심이에요. "+l.grammar.note
+      :"오늘 말할 네 문장이에요. "+l.ph.map(p=>p.en).join(" ")+" 지금 외우지 않아도 돼요. 여러 번 말하다 보면 입에 붙어요.";
+    ex.voice=voice;
     if(ex.s===1)m='<div class="tcard">'+T(1)+'<div class="tbub"><small>선생님</small><p>안녕하세요! 오늘은 <b>'+esc(l.title)+'</b> 수업이에요.</p><p>'+esc(l.goal)+'</p><p class="tsub">'+esc(l.sub)+' 쓰는 말을 배워요. 먼저 핵심부터 짚고 갈게요.</p></div></div>';
     else if(ex.s===2)m='<div class="tcard">'+T(2)+'<div class="tbub"><small>오늘의 핵심</small><p class="tpoint" lang="en">'+esc(l.grammar.point)+'</p><p>'+esc(l.grammar.note)+'</p></div>'
       +'<div class="tbub alt"><small>이렇게 바꿔 써요</small><p class="tframe" lang="en">'+frameH(l)+'</p><p class="tsub">'+l.pat.items.map(x=>'<span lang="en">'+esc(x.w)+'</span> '+esc(x.wk)).join(" · ")+'</p></div></div>';
     else m='<div class="tcard">'+T(3,"sm")+'<div class="tbub"><small>오늘 말할 네 문장</small><ol class="tlist">'+l.ph.map(p=>'<li><b lang="en">'+esc(p.en)+'</b><span>'+esc(p.ko)+'</span></li>').join("")+'</ol><p class="tsub">지금 외우지 않아도 돼요. 여러 번 말하다 보면 입에 붙어요.</p></div></div>';
+    if(DEVICE_TTS)m+='<button type="button" class="aud tsay" id="tsay">'+I.spk+'선생님 설명 다시 듣기</button>';
   }else if(ex.t==="learn"){
     if(M().blind&&canSpeak())m='<p class="inst">먼저 듣고, 들은 대로 말해요</p>'+playB(p.en)+hidden(p,"문장 보기",true);
     else m='<p class="inst">듣고 따라 말해요</p>'+picH(p.e)+'<h1 class="en" lang="en">'+esc(p.en)+'</h1>'+(M().say&&p.say?'<p class="say">'+esc(p.say)+'</p>':"")+'<p class="ko">'+esc(p.ko)+'</p>'+(p.note?'<p class="why">'+esc(p.note)+'</p>':"")+gramH(p.en)+auds(p.en)+tipsHtml(p.en);
@@ -155,6 +160,7 @@ function showEx(){
   else if(ex.t==="build")dockBuild(ex);
   else if(ex.t==="frame"||ex.t==="intro"){
     $("#dock").innerHTML='<button type="button" class="cta" id="nx">'+(ex.t==="intro"?(ex.s<3?"다음":"시작하기"):"말해 볼게요")+'</button>';
+    if(ex.t==="intro"){const b=$("#tsay");if(b)b.addEventListener("click",()=>speakKo(ex.voice));if(P.tvoice!==false)speakKo(ex.voice);}
     $("#nx").addEventListener("click",next);
   }else dockMic(ex);
   fit();
@@ -377,7 +383,7 @@ function finish(){
   const title=S.kind==="lesson"?esc(lesson(S.id).title)+" 수업을 마쳤어요":"복습을 마쳤어요";
   const talk=S.kind==="lesson"&&llmReady()?'<button type="button" class="txt" id="talk">이 주제로 AI 선생님과 대화하기</button>':"";
   const id=S.id;
-  app.innerHTML='<div class="fin"><h1>'+title+'</h1><ul class="rows"><li><span>방금 영어로 말한 횟수</span><b>'+S.said+'번</b></li><li><span>걸린 시간</span><b>약 '+mins+'분</b></li><li><span>연속 학습</span><b>'+streak(P)+'일</b></li>'+extra+'</ul>'+note+'</div>';
+  app.innerHTML='<div class="fin">'+(S.kind==="lesson"?'<img class="tch fin-t" src="img/t4.webp" alt="선생님" width="432" height="540"><p class="tbub" style="margin-bottom:8px"><small>선생님</small>잘했어요! 오늘 배운 문장은 내일 복습에 다시 나와요.</p>':"")+'<h1>'+title+'</h1><ul class="rows"><li><span>방금 영어로 말한 횟수</span><b>'+S.said+'번</b></li><li><span>걸린 시간</span><b>약 '+mins+'분</b></li><li><span>연속 학습</span><b>'+streak(P)+'일</b></li>'+extra+'</ul>'+note+'</div>';
   chrome.innerHTML='<div class="dock fixed"><button type="button" class="cta" id="home">홈으로</button>'+talk+'</div>';
   sfx("done");confetti();
   $("#home").addEventListener("click",()=>show("today"));
