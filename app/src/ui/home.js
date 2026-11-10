@@ -1,6 +1,6 @@
 // Tab screens (today, lessons, stats, settings) and first-launch screens (welcome, level test).
 import {P,save,exportData,importData} from "../core/store.js";
-export const VERSION="2026.11.10-7";
+export const VERSION="2026.11.10-8";
 import {LEVELS,LV,levelIndex} from "../core/levels.js";
 import {unitsOf,orderOf,lesson,reviewed} from "../core/content.js";
 import {plan,stats,nextLesson} from "../core/plan.js";

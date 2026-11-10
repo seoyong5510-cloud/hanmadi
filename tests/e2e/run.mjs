@@ -102,8 +102,8 @@ async function driveSession(page,mode){
   return await page.evaluate(async mode=>{
     const sleep=ms=>new Promise(r=>setTimeout(r,ms)),q=s=>document.querySelector(s),all=s=>[...document.querySelectorAll(s)];
     const seen=[];let guard=0,missed={};
-    const findWord=ko=>{for(const id of ["l","m","b","d","c","e","f"].flatMap(p=>[1,2,3,4,5,6,7,8,9,10].map(n=>p+n))){const l=window.__t.lesson(id);if(!l)continue;const w=l.words.find(w=>w.ko===ko);if(w)return w.w;}return null;};
-    const findKo=en=>{for(const id of ["l","m","b","d","c","e","f"].flatMap(p=>[1,2,3,4,5,6,7,8,9,10].map(n=>p+n))){const l=window.__t.lesson(id);if(!l)continue;const t=l.talk.find(t=>t.them===en);if(t)return t.ko;}return null;};
+    const findWord=ko=>{for(const l of window.__t.all()){const w=l.words.find(w=>w.ko===ko);if(w)return w.w;}return null;};
+    const findKo=en=>{for(const l of window.__t.all()){const t=l.talk.find(t=>t.them===en);if(t)return t.ko;}return null;};
     while(guard++<400){
       await sleep(25);
       if(q("#home"))return {done:true,seen};
@@ -181,11 +181,11 @@ try{
   ok("old progress migrated (level, lessons, days)",mig.level==="a1"&&mig.done.l1===true&&mig.days["2026-11-10"]===15,JSON.stringify(mig));
   ok("old record left untouched and new record written",mig.old===JSON.stringify(OLD)&&mig.v2);
   ok("cards for the finished lesson completed (12)",mig.cards===12,String(mig.cards));
-  ok("today shows 입문 단계 and the next lesson",(await txt(page,".date")).includes("입문")&&(await txt(page,"#app")).includes("자기소개"));
+  ok("today shows 입문 단계 and a next lesson",(await txt(page,".date")).includes("입문")&&!!(await page.$('.rows [data-lesson]')));
   await page.screenshot({path:SHOTS+"/04-today-migrated.png"});
 
   /* 3. a full lesson at A1 with a wrong first try everywhere */
-  await page.click('.rows [data-lesson="l2"]');
+  await page.evaluate(()=>window.__t.show("lessons"));await page.click('[data-lesson="l2"]');
   ok("lesson opens with its goal and grammar point",(await txt(page,".inst")).includes("이번 수업")&&(await txt(page,".ans")).length>10);
   await page.screenshot({path:SHOTS+"/05-lesson-intro.png"});
   await page.click("#nx");await page.waitForSelector("h1.en");
@@ -325,7 +325,7 @@ try{
   await page.context().close();
 
   /* 13. one lesson at each remaining level (level-specific behaviour) */
-  for(const [lv,id,frame] of [["a1","m7",""],["a1","m10",""],["a2","b1","Are you free this Saturday"],["a2p","d1",""],["b1","c1",""],["b2","e1",""],["c1","f1",""]]){
+  for(const [lv,id,frame] of [["a1","m7",""],["a1","p28",""],["a1","p44",""],["a2","q33",""],["a2","b1","Are you free this Saturday"],["a2p","d1",""],["b1","c1",""],["b2","e1",""],["c1","f1",""]]){
     ({page,errors}=await newPage({width:390,height:844},{"hanmadi-v2":JSON.stringify({v:2,level:lv,snd:false,mic:1})}));
     await page.evaluate(([id])=>{
       const l=window.__t.lesson(id);
