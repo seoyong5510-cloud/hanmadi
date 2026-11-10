@@ -28,7 +28,8 @@ function startLesson(id){
   const picQ=wd=>({t:"pic",wd,ans:wd.w,fbA:wd.e+" "+wd.w,fbB:wd.ko,spk:wd.w,
     opts:shuffle([wd.w].concat(shuffle(l.words.filter(x=>x!==wd)).slice(0,2).map(x=>x.w)))});
   q.push({t:"intro",l});
-  l.ph.forEach(p=>q.push({t:"learn",p,en:p.en}));
+  // Each new sentence: see and repeat, then say it again at once with half the words hidden.
+  l.ph.forEach(p=>{q.push({t:"learn",p,en:p.en});q.push({t:"fade",p,en:p.en});});
   ws.forEach(wd=>q.push(picQ(wd)));
   if(tts){
     const th=l.talk.filter(t=>t.them);
@@ -43,6 +44,8 @@ function startLesson(id){
   ws.forEach(wd=>q.push({t:"spell",wd,hard:M().spell!=="tiles"}));
   q.push({t:"frame",l});
   l.pat.items.forEach(p=>q.push({t:"pat",p,en:p.en,l}));
+  // the same new sentences again, now from Korean only and in a different order
+  shuffle(l.pat.items).forEach(p=>q.push({t:"recall",p,en:p.en,apply:true}));
   q.push({t:"free",l});
   // mix in two older sentences so earlier lessons are not forgotten
   Object.keys(P.cards).filter(k=>k.split(":")[0]!==id&&!k.includes(":w")&&cardData(k))
@@ -51,7 +54,7 @@ function startLesson(id){
   l.talk.forEach(tk=>q.push({t:"talk",tk,p:l.ph[tk.you],en:l.ph[tk.you].en,l}));
   // last round: every new sentence once more from memory, so each one is retrieved several times
   // with other work in between (repeated spaced retrieval is what makes it stick)
-  shuffle(l.ph).forEach(p=>q.push({t:"recall",p,en:p.en,last:true}));
+  shuffle(l.ph.concat(l.pat.items)).forEach(p=>q.push({t:"recall",p,en:p.en,last:true}));
   begin({kind:"lesson",id,q});
 }
 function startReview(){
@@ -102,6 +105,10 @@ function showEx(){
     if(M().blind&&canSpeak())m='<p class="inst">먼저 듣고, 들은 대로 말해요</p>'+playB(p.en)+hidden(p,"문장 보기",true);
     else m='<p class="inst">듣고 따라 말해요</p>'+picH(p.e)+'<h1 class="en" lang="en">'+esc(p.en)+'</h1>'+(M().say&&p.say?'<p class="say">'+esc(p.say)+'</p>':"")+'<p class="ko">'+esc(p.ko)+'</p>'+(p.note?'<p class="why">'+esc(p.note)+'</p>':"")+gramH(p.en)+auds(p.en)+tipsHtml(p.en);
     auto=p.en;
+  }else if(ex.t==="fade"){
+    const ws=p.en.split(/\s+/),hide=i=>ws.length<3?i===ws.length-1:i%2===1;
+    m='<p class="inst">가려진 부분을 채워서 다시 말해요</p><h1 class="koq">'+esc(p.ko)+'</h1><p class="fadeline" lang="en">'
+     +ws.map((w,i)=>hide(i)?'<span class="gap" style="width:'+Math.max(2,w.replace(/[.,!?]/g,"").length)*0.62+'em"></span>'+esc((w.match(/[.,!?]+$/)||[""])[0]):esc(w)).join(" ")+'</p>'+hidden(p);
   }else if(ex.t==="pic"){
     m='<p class="inst">뜻에 맞는 영어 단어를 골라요</p>'+picH(ex.wd.e)+'<h1 class="koq">'+esc(ex.wd.ko)+'</h1>'+optsH(ex,true);
   }else if(ex.t==="spell"){
@@ -116,7 +123,7 @@ function showEx(){
     m='<p class="inst">듣고 그대로 말해요</p>'+playB(p.en)+hidden(p,"문장 보기",true);
     auto=p.en;
   }else if(ex.t==="recall"){
-    m='<p class="inst">'+(ex.last?"마지막 확인! 바로 떠올려 말해 봐요":ex.old?"지난 수업 문장이에요. 기억나는 대로 말해요":p.mx?"전에 고친 문장이에요. 바르게 말해 봐요":S.kind==="review"?"기억나는 대로 영어로 말해요":"이번엔 안 보고 영어로 말해요")+'</p>'+picH(p.e)+'<h1 class="koq">'+esc(p.ko)+'</h1>'+hidden(p);
+    m='<p class="inst">'+(ex.last?"마지막 확인! 3초 안에 떠올려 말해 봐요":ex.apply?"방금 만든 문장이에요. 안 보고 말해요":ex.old?"지난 수업 문장이에요. 기억나는 대로 말해요":p.mx?"전에 고친 문장이에요. 바르게 말해 봐요":S.kind==="review"?"기억나는 대로 영어로 말해요":"이번엔 안 보고 영어로 말해요")+'</p>'+picH(p.e)+'<h1 class="koq">'+esc(p.ko)+'</h1>'+hidden(p);
   }else if(ex.t==="frame"){
     m='<p class="inst">단어만 바꾸면 새 문장이 돼요</p><h1 class="frame" lang="en">'+frameH(ex.l)+'</h1><ul class="swap">'
      +ex.l.pat.items.map(x=>'<li><b lang="en">'+esc(x.w)+'</b><span>'+esc(x.wk)+'</span></li>').join("")+'</ul>'+(ex.l.pat.note?'<p class="note">'+esc(ex.l.pat.note)+'</p>':"");

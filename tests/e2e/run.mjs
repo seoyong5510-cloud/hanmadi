@@ -191,11 +191,15 @@ try{
   await page.click("#nx");await page.waitForSelector("h1.en");
   ok("study screen explains the grammar of the sentence",(await txt(page,".gram")).includes("from")&&(await txt(page,".gram")).includes("전치사"),await txt(page,".gram"));
   await page.screenshot({path:SHOTS+"/05b-grammar.png"});
+  await page.evaluate(()=>{window.__next=()=>"I'm from Korea";});await page.click("#mic");await page.waitForSelector("#nx");await page.click("#nx");await page.waitForSelector(".fadeline");
+  ok("right after learning, the sentence is repeated with half the words hidden",(await page.$$(".fadeline .gap")).length>=1&&(await txt(page,".fadeline")).includes("I'm"));
+  await page.screenshot({path:SHOTS+"/05c-fade.png"});
   await page.evaluate(()=>{window.__frame=()=>"I like fishing";});
   let r=await driveSession(page,"badfirst");
   ok("A1 lesson completes with wrong-then-right answers",r.done===true,JSON.stringify(r).slice(0,300));
   ok("lesson used choice, spelling and speaking exercises",["choice","spell","speak","build"].every(k=>r.seen.includes(k)));
   await page.screenshot({path:SHOTS+"/06-lesson-done.png"});
+  ok("each new sentence is spoken many times in one lesson (repeat, half-hidden, recall, role-play, final round)",r.seen.filter(k=>k==="speak").length>=30,String(r.seen.filter(k=>k==="speak").length));
   let st=await page.evaluate(()=>{const P=window.__t.P;return {done:P.done.l2,cards:Object.keys(P.cards).length,secs:Object.values(P.secs).reduce((a,b)=>a+b,0),said:Object.values(P.days).reduce((a,b)=>a+b,0)};});
   ok("lesson recorded: done, 24 cards, spoken count grew, time tracked",st.done===true&&st.cards===24&&st.said>15&&st.secs>=1,JSON.stringify(st));
   await page.click("#home");
