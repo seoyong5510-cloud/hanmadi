@@ -2,255 +2,356 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>한마디 영어</title>
-<meta name="theme-color" content="#2c47d6">
+<meta name="theme-color" content="#ffffff">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Sans+KR:wght@400;500;600&family=Lexend:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
 :root{
-  /* layout: one phone-width column. Highlighter yellow marks the words you said right. */
-  --bg:#f2f4fa; --surface:#ffffff; --ink:#141b34; --muted:#5b6485; --line:#dde2ef;
-  --accent:#2c47d6; --on-accent:#ffffff; --mark:#ffdc5c; --good:#17855a; --bad:#c93a55;
-  --f-display:"Black Han Sans","IBM Plex Sans KR",system-ui,sans-serif;
-  --f-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
-  --f-en:"Lexend","IBM Plex Sans KR",system-ui,sans-serif;
+  /* layout: one phone column, flat white, list rows with hairlines, one fixed action at the bottom */
+  --bg:#ffffff; --fill:#f2f4f6; --ink:#191f28; --sub:#6b7684; --faint:#b0b8c1; --line:#e5e8eb;
+  --brand:#2f6bff; --on-brand:#ffffff; --ok:#00a86b; --ok-bg:#e8f8f0; --no:#f04452; --no-bg:#fff0f1; --mark:#ffe27a;
+  --font:"Pretendard Variable",Pretendard,-apple-system,"Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
   color-scheme:light;
 }
 @media (prefers-color-scheme:dark){
-  :root:not([data-theme="light"]){
-    --bg:#0e1222; --surface:#181d33; --ink:#eef0fa; --muted:#9ba4c6; --line:#2a3152;
-    --accent:#93a4ff; --on-accent:#0e1222; --mark:#6a5a14; --good:#5fd0a0; --bad:#ff8fa3;
+  :root{
+    --bg:#17171c; --fill:#24242c; --ink:#f2f4f6; --sub:#9ea4ae; --faint:#5a606b; --line:#2e2f38;
+    --brand:#5b8cff; --on-brand:#ffffff; --ok:#2fd08b; --ok-bg:#15291f; --no:#ff6b76; --no-bg:#33191c; --mark:#6b5a14;
     color-scheme:dark;
   }
 }
-:root[data-theme="dark"]{
-  --bg:#0e1222; --surface:#181d33; --ink:#eef0fa; --muted:#9ba4c6; --line:#2a3152;
-  --accent:#93a4ff; --on-accent:#0e1222; --mark:#6a5a14; --good:#5fd0a0; --bad:#ff8fa3;
-  color-scheme:dark;
-}
-*{box-sizing:border-box}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html,body{margin:0}
-body{background:var(--bg);color:var(--ink);font:16px/1.6 var(--f-body);word-break:keep-all;-webkit-text-size-adjust:100%}
-#app{max-width:460px;margin:0 auto;padding:22px 18px 56px;display:grid;gap:20px}
-h1,h2,h3,p,ol,dl,dd{margin:0}
-ol{padding:0;list-style:none}
-h1,h2,h3{text-wrap:balance;line-height:1.25}
+body{background:var(--bg);color:var(--ink);font:16px/1.5 var(--font);word-break:keep-all;-webkit-text-size-adjust:100%}
+h1,h2,h3,p,ol,ul{margin:0;padding:0}
+ol,ul{list-style:none}
 button,input{font:inherit;color:inherit}
-button{cursor:pointer}
-:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+button{cursor:pointer;border:0;background:none;padding:0}
+:focus-visible{outline:3px solid var(--brand);outline-offset:2px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 [hidden]{display:none !important}
-.eyebrow{font-size:13px;font-weight:600;color:var(--accent);letter-spacing:.02em}
-.muted{color:var(--muted);font-size:15px}
+#app{max-width:480px;margin:0 auto;padding:24px 20px 190px}
+.fixed{position:fixed;left:0;right:0;margin:0 auto;max-width:480px}
 
-/* home */
-.top h1{font:400 30px/1.1 var(--f-display)}
-.top p{color:var(--muted);font-size:15px;margin-top:4px}
-.stats{display:flex;align-items:center;gap:18px;flex-wrap:wrap;padding:16px 18px;background:var(--surface);border:1px solid var(--line);border-radius:14px}
-.streak{display:flex;align-items:baseline;gap:6px}
-.streak .num{font:400 56px/1 var(--f-display);color:var(--accent);font-variant-numeric:tabular-nums}
-.streak .unit{font-weight:600}
-.stats dl{display:flex;gap:18px;margin-left:auto}
-.stats dt{font-size:13px;color:var(--muted)}
-.stats dd{font-weight:600;font-variant-numeric:tabular-nums}
-.today{display:grid;gap:8px;padding:20px 18px;background:var(--surface);border:1px solid var(--line);border-left:6px solid var(--accent);border-radius:14px}
-.today h2{font-size:22px}
-.peek{font:600 17px/1.4 var(--f-en);margin:4px 0 8px}
-.peek span{background:linear-gradient(transparent 55%,var(--mark) 55%)}
-h3{font-size:15px;color:var(--muted);font-weight:600;margin-bottom:8px}
-.list{display:grid;gap:8px}
-.list button{width:100%;display:flex;align-items:center;gap:12px;text-align:left;padding:12px 14px;min-height:60px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
-.list .n{font:400 22px/1 var(--f-display);color:var(--muted);width:22px;font-variant-numeric:tabular-nums}
-.list .t{flex:1;display:grid}
-.list .t b{font-weight:600}
-.list .t small{color:var(--muted);font-size:13px}
-.pill{font-size:13px;padding:2px 10px;border-radius:99px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
-.pill.ok{border-color:var(--good);color:var(--good);font-weight:600}
-.note{font-size:13px;color:var(--muted);padding:10px 12px;border:1px dashed var(--line);border-radius:10px}
-footer{font-size:13px;color:var(--muted)}
+/* tabs + bottom action */
+.tabs{bottom:0;display:flex;background:var(--bg);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom)}
+.tabs button{flex:1;display:grid;justify-items:center;gap:2px;padding:9px 0 8px;font-size:11px;font-weight:600;color:var(--faint)}
+.tabs button.on{color:var(--ink)}
+.cta-wrap{bottom:calc(58px + env(safe-area-inset-bottom));padding:12px 20px;background:linear-gradient(transparent,var(--bg) 30%)}
+.cta{display:flex;align-items:center;justify-content:center;width:100%;min-height:56px;border-radius:16px;background:var(--brand);color:var(--on-brand);font-size:17px;font-weight:700}
+.cta.dark{background:var(--ink);color:var(--bg)}
+.cta:active{transform:scale(.98)}
 
-/* buttons */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:50px;padding:10px 20px;border-radius:12px;border:1px solid var(--line);background:var(--surface);font-weight:600;width:100%}
-.btn.primary{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
-.btn.ghost{background:transparent}
-.btn.small{width:auto;min-height:48px;padding:8px 16px}
-.say{display:none;align-items:center;gap:6px;min-height:40px;padding:6px 12px;border-radius:99px;border:1px solid var(--line);background:var(--bg);font-size:14px;font-weight:500}
-.has-tts .say{display:inline-flex}
-.ai-only{display:none}
-.has-ai .ai-only{display:inline-flex}
+/* today */
+.date{font-size:14px;color:var(--sub);font-weight:500}
+.hero{font-size:26px;font-weight:800;line-height:1.3;letter-spacing:-.02em;margin-top:4px;text-wrap:balance}
+.week{display:flex;justify-content:space-between;margin:26px 0 8px}
+.week li{display:grid;justify-items:center;gap:8px;font-size:12px;color:var(--sub);font-weight:500}
+.week i{display:grid;place-items:center;width:36px;height:36px;border-radius:50%;background:var(--fill);color:transparent}
+.week .did i{background:var(--brand);color:var(--on-brand)}
+.week .now{color:var(--ink);font-weight:700}
+.week .now:not(.did) i{box-shadow:inset 0 0 0 2px var(--brand);background:transparent}
+.sec{font-size:13px;font-weight:700;color:var(--sub);margin:30px 0 4px}
+.rows li+li{border-top:1px solid var(--line)}
+.row{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:16px 0;min-height:68px}
+.row .ic{display:grid;place-items:center;flex:none;width:40px;height:40px;border-radius:12px;background:var(--fill);font-weight:800;font-size:15px;color:var(--sub);font-variant-numeric:tabular-nums}
+.row .ic.done{background:var(--ok-bg);color:var(--ok)}
+.row .tx{flex:1;min-width:0;display:grid}
+.row b{font-size:17px;font-weight:700}
+.row small{font-size:14px;color:var(--sub)}
+.row .go{color:var(--faint);flex:none}
+.row .chip{flex:none;font-size:13px;font-weight:700;color:var(--brand)}
+.row.off b{color:var(--sub)}
+.unit{font-size:20px;font-weight:800;margin:30px 0 2px;letter-spacing:-.01em}
+.unit:first-child{margin-top:0}
+.ptitle{font-size:26px;font-weight:800;letter-spacing:-.02em;margin-bottom:22px}
 
-/* lesson */
-.bar{display:flex;align-items:center;gap:12px}
-.back{min-height:40px;padding:6px 12px;border-radius:10px;border:1px solid var(--line);background:var(--surface);font-size:14px}
-.steps{flex:1;display:flex;gap:6px}
-.steps li{flex:1;font-size:13px;color:var(--muted);padding-top:8px;border-top:4px solid var(--line);text-align:center}
-.steps li.past{border-color:var(--good);color:var(--good)}
-.steps li.on{border-color:var(--accent);color:var(--ink);font-weight:600}
-.lead h2{font-size:22px}
-.lead p{color:var(--muted);font-size:15px}
-.cards{display:grid;gap:10px}
-.card{display:grid;gap:4px;padding:16px;background:var(--surface);border:1px solid var(--line);border-radius:14px}
-.en{font:600 22px/1.3 var(--f-en);overflow-wrap:anywhere}
-.card .en{font-size:19px}
-.hangul{color:var(--accent);font-weight:500}
-.ko{color:var(--muted);font-size:15px}
-.card .say,.focus .say{justify-self:start;margin-top:6px}
-.focus{display:grid;gap:6px;padding:20px 18px;background:var(--surface);border:1px solid var(--line);border-radius:14px}
-.count{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
-.bubble{display:grid;gap:4px;padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-radius:4px 16px 16px 16px;max-width:90%}
-.bubble .en{font-size:18px}
-.bubble.me{justify-self:end;border-radius:16px 4px 16px 16px;background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
-.bubble .tip{font-size:14px;padding-top:8px;margin-top:4px;border-top:1px dashed var(--line)}
-.bubble.sys{background:transparent;border-style:dashed;color:var(--muted);font-size:14px;max-width:100%}
-.task{display:grid;gap:6px;padding:14px 16px;border:1px dashed var(--accent);border-radius:14px}
-.task .ko{color:var(--ink);font-weight:600;font-size:17px}
-.linkbtn{justify-self:start;background:none;border:0;padding:6px 0;min-height:36px;color:var(--accent);text-decoration:underline;font-size:14px}
+/* stats */
+.big{display:flex;align-items:baseline;gap:6px;margin-bottom:22px}
+.big b{font-size:60px;font-weight:800;line-height:1;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.big span{font-size:18px;font-weight:700}
+.three{display:flex;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.three div{flex:1;padding:16px 0}
+.three div+div{border-left:1px solid var(--line);padding-left:16px}
+.three b{display:block;font-size:24px;font-weight:800;font-variant-numeric:tabular-nums}
+.three span{font-size:13px;color:var(--sub)}
+.bars{display:flex;align-items:flex-end;gap:10px;height:150px;margin-top:14px}
+.bars li{flex:1;display:grid;grid-template-rows:auto 1fr auto;justify-items:center;gap:6px;height:100%;font-size:12px;color:var(--sub);font-variant-numeric:tabular-nums}
+.bars .col{align-self:end;width:100%;border-radius:8px 8px 4px 4px;background:var(--fill);min-height:4px}
+.bars .now .col{background:var(--brand)}
+.bars .now{color:var(--ink);font-weight:700}
+.note{font-size:13px;color:var(--sub);margin-top:26px;line-height:1.6}
 
-/* answer */
-.answer,.inbox{display:grid;gap:10px}
-.mic{display:none;align-items:center;justify-content:center;gap:10px;min-height:64px;border-radius:99px;border:2px solid var(--accent);background:var(--surface);font-weight:600;font-size:17px}
-.has-mic .mic{display:flex}
-.mic .dot{width:14px;height:14px;border-radius:50%;background:var(--accent)}
-.mic.on{background:var(--bad);border-color:var(--bad);color:var(--surface)}
-.mic.on .dot{background:var(--surface);animation:pulse 1s ease-in-out infinite}
-@keyframes pulse{50%{transform:scale(1.6);opacity:.5}}
-@media (prefers-reduced-motion:reduce){.mic.on .dot{animation:none}}
-.heard{min-height:1.6em;font:400 15px/1.5 var(--f-en);color:var(--muted);text-align:center}
-.typeform{display:flex;gap:8px}
-.typeform input{flex:1;min-width:0;min-height:48px;padding:8px 14px;border-radius:12px;border:1px solid var(--line);background:var(--surface);font-family:var(--f-en)}
-.result{display:grid;gap:8px;padding:16px;background:var(--surface);border:1px solid var(--line);border-radius:14px}
-.verdict{font-weight:600}
-.verdict.ok{color:var(--good)}
-.verdict.no{color:var(--bad)}
-.words{font:600 20px/1.7 var(--f-en)}
-.w.hit{background:linear-gradient(transparent 55%,var(--mark) 55%)}
-.w.miss{color:var(--bad);border-bottom:2px dashed var(--bad)}
-.said{font-size:14px;color:var(--muted);overflow-wrap:anywhere}
+/* session */
+.sbar{display:flex;align-items:center;gap:14px;margin:-6px 0 34px}
+.x{display:grid;place-items:center;width:40px;height:40px;margin-left:-10px;color:var(--sub)}
+.prog{flex:1;height:8px;border-radius:99px;background:var(--fill);overflow:hidden}
+.prog i{display:block;height:100%;border-radius:99px;background:var(--brand);transition:width .25s}
+.ex{padding-bottom:120px}
+.inst{font-size:15px;font-weight:700;color:var(--brand);margin-bottom:14px}
+.en{font-size:30px;font-weight:800;line-height:1.25;letter-spacing:-.02em;overflow-wrap:anywhere}
+.say{font-size:17px;color:var(--sub);margin-top:10px}
+.ko{font-size:17px;margin-top:4px}
+.koq{font-size:28px;font-weight:800;line-height:1.3;letter-spacing:-.02em}
+.auds{display:flex;gap:8px;margin-top:22px}
+.aud{display:inline-flex;align-items:center;gap:6px;min-height:44px;padding:0 16px;border-radius:99px;background:var(--fill);font-size:15px;font-weight:600}
+.txt{font-size:14px;font-weight:600;color:var(--sub);text-decoration:underline;text-underline-offset:3px;min-height:40px}
+.hintb{margin-top:18px}
+.ans{margin-top:22px;padding:16px 18px;border-radius:16px;background:var(--fill)}
+.ans .en{font-size:22px}
+.them{display:inline-block;max-width:92%;padding:14px 18px;border-radius:4px 20px 20px 20px;background:var(--fill)}
+.them .t-en{font-size:20px;font-weight:700}
+.them .t-ko{font-size:14px;color:var(--sub);margin-top:2px}
+.narr{font-size:16px;color:var(--sub)}
+.reply{margin-top:30px}
+.reply small{display:block;font-size:13px;font-weight:700;color:var(--sub);margin-bottom:4px}
+.frame{font-size:28px;font-weight:800;line-height:1.3;letter-spacing:-.02em}
+.frame u{text-decoration:none;display:inline-block;min-width:54px;border-bottom:4px solid var(--brand)}
+.swap{margin-top:26px}
+.swap li{display:flex;justify-content:space-between;gap:12px;padding:14px 0;font-size:17px}
+.swap li+li{border-top:1px solid var(--line)}
+.swap b{font-weight:700}
+.swap span{color:var(--sub)}
+.word{display:inline-block;margin-top:14px;padding:6px 12px;border-radius:10px;background:var(--fill);font-size:15px;font-weight:600}
+.bigplay{display:grid;place-items:center;width:96px;height:96px;border-radius:50%;background:var(--brand);color:var(--on-brand);margin:6px 0 30px}
+.opts{display:grid;gap:10px}
+.opt{width:100%;text-align:left;padding:16px 18px;border-radius:16px;background:var(--fill);font-size:17px;font-weight:600;min-height:58px}
+.opt.ok{background:var(--ok-bg);color:var(--ok)}
+.opt.no{background:var(--no-bg);color:var(--no)}
 
-/* done + chat */
-.done{display:grid;gap:14px;padding:26px 18px;background:var(--surface);border:1px solid var(--line);border-radius:14px}
-.done h2{font-size:22px}
-.chat{display:grid;gap:10px}
-.typing{color:var(--muted);font-size:14px}
+/* dock */
+.dock{bottom:0;display:grid;justify-items:center;gap:6px;padding:14px 20px calc(16px + env(safe-area-inset-bottom));background:var(--bg)}
+.dock.ok{background:var(--ok-bg)}
+.dock.no{background:var(--no-bg)}
+.heard{min-height:24px;font-size:16px;color:var(--sub);text-align:center}
+.micbtn{display:grid;place-items:center;width:84px;height:84px;border-radius:50%;background:var(--brand);color:var(--on-brand)}
+.micbtn.on{background:var(--no);animation:ring 1.2s ease-out infinite}
+@keyframes ring{0%{box-shadow:0 0 0 0 rgba(240,68,82,.45)}100%{box-shadow:0 0 0 22px rgba(240,68,82,0)}}
+@media (prefers-reduced-motion:reduce){.micbtn.on{animation:none}.prog i{transition:none}}
+.mic-l{font-size:15px;font-weight:700}
+.kf{display:flex;gap:8px;width:100%}
+.kf input{flex:1;min-width:0;min-height:52px;padding:0 16px;border-radius:14px;border:1px solid var(--line);background:var(--bg);font-size:17px}
+.kf button{min-height:52px;padding:0 18px;border-radius:14px;background:var(--ink);color:var(--bg);font-weight:700}
+.fb{display:grid;gap:8px;width:100%;justify-items:start}
+.fb-t{font-size:20px;font-weight:800}
+.ok .fb-t{color:var(--ok)}
+.no .fb-t{color:var(--no)}
+.words{font-size:22px;font-weight:700;line-height:1.5}
+.w.hit{background:linear-gradient(transparent 58%,var(--mark) 58%)}
+.w.miss{color:var(--no);text-decoration:underline wavy;text-underline-offset:5px}
+.fb .sub{font-size:14px;color:var(--sub);overflow-wrap:anywhere}
+.fb .cta{margin-top:8px}
+.ok .cta{background:var(--ok)}
+.fb .txt{justify-self:center}
+
+/* finish */
+.fin{padding-top:56px}
+.fin h1{font-size:30px;font-weight:800;line-height:1.3;letter-spacing:-.02em}
+.fin .rows{margin-top:30px;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.fin .rows li{display:flex;justify-content:space-between;padding:16px 0;font-size:17px}
+.fin .rows b{font-weight:800;font-variant-numeric:tabular-nums}
 </style>
 </head>
 <body>
 <div id="app"></div>
+<div id="chrome"></div>
 <script>
 "use strict";
-const LESSONS=[
- {id:"l1",title:"첫인사",place:"처음 만난 이웃과",role:"Tom, a friendly neighbor meeting the learner for the first time.",
-  phrases:[
-   {en:"Hello.",say:"헬로우",ko:"안녕하세요."},
-   {en:"Nice to meet you.",say:"나이스 투 밋 츄",ko:"만나서 반가워요."},
-   {en:"How are you?",say:"하우 아 유?",ko:"어떻게 지내세요?"},
-   {en:"I'm good, thank you.",say:"아임 굿, 땡큐",ko:"잘 지내요, 고마워요."}],
-  talk:[
-   {them:"Hi there!",ko:"안녕하세요!",you:0},
-   {them:"I'm Tom.",ko:"저는 톰이에요.",you:1},
-   {them:"Nice to meet you too.",ko:"저도 반가워요.",you:2},
-   {them:"I'm great. How about you?",ko:"아주 좋아요. 당신은요?",you:3}]},
- {id:"l2",title:"자기소개",place:"모임에서 옆자리 사람과",role:"Amy, a friendly person at a small party asking simple questions about the learner.",
-  phrases:[
-   {en:"I'm from Korea.",say:"아임 프럼 코리아",ko:"저는 한국에서 왔어요."},
-   {en:"I live in Seoul.",say:"아이 리브 인 서울",ko:"저는 서울에 살아요."},
-   {en:"I work at a company.",say:"아이 워크 앳 어 컴퍼니",ko:"저는 회사에 다녀요."},
-   {en:"I like soccer.",say:"아이 라이크 사커",ko:"저는 축구를 좋아해요."}],
-  talk:[
-   {them:"Where are you from?",ko:"어디에서 오셨어요?",you:0},
-   {them:"Oh, nice! Where do you live?",ko:"오, 좋네요! 어디에 사세요?",you:1},
-   {them:"What do you do?",ko:"무슨 일을 하세요?",you:2},
-   {them:"What do you like?",ko:"뭘 좋아하세요?",you:3}]},
- {id:"l3",title:"카페에서 주문하기",place:"카페 계산대 앞에서",role:"a kind barista taking the learner's order at a cafe.",
-  phrases:[
-   {en:"Can I get a coffee, please?",say:"캔 아이 겟 어 커피, 플리즈?",ko:"커피 한 잔 주시겠어요?"},
-   {en:"Iced, please.",say:"아이스드, 플리즈",ko:"차가운 걸로 주세요."},
-   {en:"For here, please.",say:"포 히어, 플리즈",ko:"여기서 마실게요."},
-   {en:"How much is it?",say:"하우 머치 이즈 잇?",ko:"얼마예요?"}],
-  talk:[
-   {them:"Hi! What can I get for you?",ko:"안녕하세요! 무엇을 드릴까요?",you:0},
-   {them:"Hot or iced?",ko:"따뜻한 거요, 차가운 거요?",you:1},
-   {them:"For here or to go?",ko:"드시고 가세요, 가져가세요?",you:2},
-   {them:"Okay, one iced coffee.",ko:"네, 아이스 커피 한 잔이요.",you:3}]},
- {id:"l4",title:"길 묻기",place:"낯선 거리에서",role:"a helpful local person on the street giving the learner simple directions.",
-  phrases:[
-   {en:"Excuse me.",say:"익스큐즈 미",ko:"실례합니다."},
-   {en:"Where is the subway station?",say:"웨어 이즈 더 서브웨이 스테이션?",ko:"지하철역이 어디예요?"},
-   {en:"Is it far from here?",say:"이즈 잇 파 프럼 히어?",ko:"여기서 먼가요?"},
-   {en:"Thank you so much.",say:"땡큐 쏘 머치",ko:"정말 감사합니다."}],
-  talk:[
-   {them:"",ko:"지나가는 사람이 보여요. 먼저 말을 걸어 보세요.",you:0},
-   {them:"Yes? Can I help you?",ko:"네? 도와드릴까요?",you:1},
-   {them:"Go straight. It's on your left.",ko:"쭉 가세요. 왼쪽에 있어요.",you:2},
-   {them:"No, just five minutes.",ko:"아니요, 5분이면 돼요.",you:3}]},
- {id:"l5",title:"식당에서",place:"식당 입구와 테이블에서",role:"a polite waiter at a casual restaurant serving the learner.",
-  phrases:[
-   {en:"A table for two, please.",say:"어 테이블 포 투, 플리즈",ko:"두 명 자리 주세요."},
-   {en:"Can I see the menu?",say:"캔 아이 씨 더 메뉴?",ko:"메뉴판 볼 수 있을까요?"},
-   {en:"This one, please.",say:"디스 원, 플리즈",ko:"이걸로 주세요."},
-   {en:"Check, please.",say:"첵, 플리즈",ko:"계산서 주세요."}],
-  talk:[
-   {them:"Welcome! How many?",ko:"어서 오세요! 몇 분이세요?",you:0},
-   {them:"Right this way.",ko:"이쪽으로 오세요.",you:1},
-   {them:"Here you go. What would you like?",ko:"여기 있어요. 무엇을 드시겠어요?",you:2},
-   {them:"Did you enjoy your meal?",ko:"식사 맛있게 하셨어요?",you:3}]},
- {id:"l6",title:"옷 가게에서",place:"옷 가게 안에서",role:"a friendly clerk at a clothing store helping the learner.",
-  phrases:[
-   {en:"I'm just looking.",say:"아임 저스트 루킹",ko:"그냥 구경하는 중이에요."},
-   {en:"Do you have a bigger size?",say:"두 유 해브 어 비거 사이즈?",ko:"더 큰 사이즈 있어요?"},
-   {en:"Can I try this on?",say:"캔 아이 트라이 디스 온?",ko:"이거 입어 봐도 돼요?"},
-   {en:"I'll take it.",say:"아일 테이크 잇",ko:"이걸로 살게요."}],
-  talk:[
-   {them:"Hi! Can I help you?",ko:"안녕하세요! 도와드릴까요?",you:0},
-   {them:"Okay. This jacket is popular.",ko:"네. 이 재킷이 인기 있어요.",you:1},
-   {them:"Yes, here is a large.",ko:"네, 여기 라지 사이즈요.",you:2},
-   {them:"Sure. How is it?",ko:"그럼요. 어떠세요?",you:3}]}
+/* ---------- content ---------- */
+const L=[
+ {id:"l1",title:"첫인사",sub:"처음 만난 이웃과",
+  ph:[{en:"Hello.",say:"헬로우",ko:"안녕하세요."},
+      {en:"Nice to meet you.",say:"나이스 투 밋 츄",ko:"만나서 반가워요."},
+      {en:"How are you?",say:"하우 아 유?",ko:"어떻게 지내세요?"},
+      {en:"I'm good, thank you.",say:"아임 굿, 땡큐",ko:"잘 지내요, 고마워요."}],
+  pat:{frame:"I'm ___.",items:[
+      {w:"fine",wk:"괜찮은",en:"I'm fine.",say:"아임 파인",ko:"저는 괜찮아요."},
+      {w:"tired",wk:"피곤한",en:"I'm tired.",say:"아임 타이어드",ko:"저는 피곤해요."},
+      {w:"happy",wk:"행복한",en:"I'm happy.",say:"아임 해피",ko:"저는 행복해요."}]},
+  talk:[{them:"Hi there!",ko:"안녕하세요!",you:0},{them:"I'm Tom.",ko:"저는 톰이에요.",you:1},
+        {them:"Nice to meet you too.",ko:"저도 반가워요.",you:2},{them:"I'm great. How about you?",ko:"아주 좋아요. 당신은요?",you:3}]},
+ {id:"l2",title:"자기소개",sub:"모임에서 옆자리 사람과",
+  ph:[{en:"I'm from Korea.",say:"아임 프럼 코리아",ko:"저는 한국에서 왔어요."},
+      {en:"I live in Seoul.",say:"아이 리브 인 서울",ko:"저는 서울에 살아요."},
+      {en:"I work at a company.",say:"아이 워크 앳 어 컴퍼니",ko:"저는 회사에 다녀요."},
+      {en:"I like soccer.",say:"아이 라이크 사커",ko:"저는 축구를 좋아해요."}],
+  pat:{frame:"I like ___.",items:[
+      {w:"coffee",wk:"커피",en:"I like coffee.",say:"아이 라이크 커피",ko:"저는 커피를 좋아해요."},
+      {w:"music",wk:"음악",en:"I like music.",say:"아이 라이크 뮤직",ko:"저는 음악을 좋아해요."},
+      {w:"movies",wk:"영화",en:"I like movies.",say:"아이 라이크 무비즈",ko:"저는 영화를 좋아해요."}]},
+  talk:[{them:"Where are you from?",ko:"어디에서 오셨어요?",you:0},{them:"Oh, nice! Where do you live?",ko:"오, 좋네요! 어디에 사세요?",you:1},
+        {them:"What do you do?",ko:"무슨 일을 하세요?",you:2},{them:"What do you like?",ko:"뭘 좋아하세요?",you:3}]},
+ {id:"l10",title:"날씨와 안부",sub:"아침에 만난 동료와",
+  ph:[{en:"It's hot today.",say:"잇츠 핫 투데이",ko:"오늘 덥네요."},
+      {en:"I'm a little tired.",say:"아임 어 리틀 타이어드",ko:"조금 피곤해요."},
+      {en:"Have a nice day.",say:"해브 어 나이스 데이",ko:"좋은 하루 보내세요."},
+      {en:"See you tomorrow.",say:"씨 유 투모로우",ko:"내일 봐요."}],
+  pat:{frame:"It's ___ today.",items:[
+      {w:"cold",wk:"추운",en:"It's cold today.",say:"잇츠 콜드 투데이",ko:"오늘 춥네요."},
+      {w:"rainy",wk:"비 오는",en:"It's rainy today.",say:"잇츠 레이니 투데이",ko:"오늘 비가 오네요."},
+      {w:"nice",wk:"날씨 좋은",en:"It's nice today.",say:"잇츠 나이스 투데이",ko:"오늘 날씨 좋네요."}]},
+  talk:[{them:"Good morning! How's the weather?",ko:"좋은 아침! 날씨 어때요?",you:0},{them:"You look sleepy.",ko:"졸려 보여요.",you:1},
+        {them:"Take a rest. I have to go now.",ko:"좀 쉬세요. 저는 이제 가야 해요.",you:2},{them:"You too! Bye!",ko:"당신도요! 안녕!",you:3}]},
+ {id:"l3",title:"카페에서 주문하기",sub:"카페 계산대 앞에서",
+  ph:[{en:"Can I get a coffee, please?",say:"캔 아이 겟 어 커피, 플리즈?",ko:"커피 한 잔 주시겠어요?"},
+      {en:"Iced, please.",say:"아이스드, 플리즈",ko:"차가운 걸로 주세요."},
+      {en:"For here, please.",say:"포 히어, 플리즈",ko:"여기서 마실게요."},
+      {en:"How much is it?",say:"하우 머치 이즈 잇?",ko:"얼마예요?"}],
+  pat:{frame:"Can I get ___, please?",items:[
+      {w:"a water",wk:"물",en:"Can I get a water, please?",say:"캔 아이 겟 어 워터, 플리즈?",ko:"물 한 잔 주시겠어요?"},
+      {w:"a latte",wk:"라떼",en:"Can I get a latte, please?",say:"캔 아이 겟 어 라테이, 플리즈?",ko:"라떼 한 잔 주시겠어요?"},
+      {w:"a tea",wk:"차",en:"Can I get a tea, please?",say:"캔 아이 겟 어 티, 플리즈?",ko:"차 한 잔 주시겠어요?"}]},
+  talk:[{them:"Hi! What can I get for you?",ko:"안녕하세요! 무엇을 드릴까요?",you:0},{them:"Hot or iced?",ko:"따뜻한 거요, 차가운 거요?",you:1},
+        {them:"For here or to go?",ko:"드시고 가세요, 가져가세요?",you:2},{them:"Okay, one iced coffee.",ko:"네, 아이스 커피 한 잔이요.",you:3}]},
+ {id:"l5",title:"식당에서",sub:"식당 입구와 테이블에서",
+  ph:[{en:"A table for two, please.",say:"어 테이블 포 투, 플리즈",ko:"두 명 자리 주세요."},
+      {en:"Can I see the menu?",say:"캔 아이 씨 더 메뉴?",ko:"메뉴판 볼 수 있을까요?"},
+      {en:"This one, please.",say:"디스 원, 플리즈",ko:"이걸로 주세요."},
+      {en:"Check, please.",say:"첵, 플리즈",ko:"계산서 주세요."}],
+  pat:{frame:"A table for ___, please.",items:[
+      {w:"one",wk:"한 명",en:"A table for one, please.",say:"어 테이블 포 원, 플리즈",ko:"한 명 자리 주세요."},
+      {w:"three",wk:"세 명",en:"A table for three, please.",say:"어 테이블 포 쓰리, 플리즈",ko:"세 명 자리 주세요."},
+      {w:"four",wk:"네 명",en:"A table for four, please.",say:"어 테이블 포 포, 플리즈",ko:"네 명 자리 주세요."}]},
+  talk:[{them:"Welcome! How many?",ko:"어서 오세요! 몇 분이세요?",you:0},{them:"Right this way.",ko:"이쪽으로 오세요.",you:1},
+        {them:"Here you go. What would you like?",ko:"여기 있어요. 무엇을 드시겠어요?",you:2},{them:"Did you enjoy your meal?",ko:"식사 맛있게 하셨어요?",you:3}]},
+ {id:"l6",title:"옷 가게에서",sub:"옷 가게 안에서",
+  ph:[{en:"I'm just looking.",say:"아임 저스트 루킹",ko:"그냥 구경하는 중이에요."},
+      {en:"Do you have a bigger size?",say:"두 유 해브 어 비거 사이즈?",ko:"더 큰 사이즈 있어요?"},
+      {en:"Can I try this on?",say:"캔 아이 트라이 디스 온?",ko:"이거 입어 봐도 돼요?"},
+      {en:"I'll take it.",say:"아일 테이크 잇",ko:"이걸로 살게요."}],
+  pat:{frame:"Do you have ___?",items:[
+      {w:"a smaller size",wk:"더 작은 사이즈",en:"Do you have a smaller size?",say:"두 유 해브 어 스몰러 사이즈?",ko:"더 작은 사이즈 있어요?"},
+      {w:"this in black",wk:"이거 검은색",en:"Do you have this in black?",say:"두 유 해브 디스 인 블랙?",ko:"이거 검은색 있어요?"},
+      {w:"a bag",wk:"봉투",en:"Do you have a bag?",say:"두 유 해브 어 백?",ko:"봉투 있어요?"}]},
+  talk:[{them:"Hi! Can I help you?",ko:"안녕하세요! 도와드릴까요?",you:0},{them:"Okay. This jacket is popular.",ko:"네. 이 재킷이 인기 있어요.",you:1},
+        {them:"Yes, here is a large.",ko:"네, 여기 라지 사이즈요.",you:2},{them:"Sure. How is it?",ko:"그럼요. 어떠세요?",you:3}]},
+ {id:"l4",title:"길 묻기",sub:"낯선 거리에서",
+  ph:[{en:"Excuse me.",say:"익스큐즈 미",ko:"실례합니다."},
+      {en:"Where is the subway station?",say:"웨어 이즈 더 서브웨이 스테이션?",ko:"지하철역이 어디예요?"},
+      {en:"Is it far from here?",say:"이즈 잇 파 프럼 히어?",ko:"여기서 먼가요?"},
+      {en:"Thank you so much.",say:"땡큐 쏘 머치",ko:"정말 감사합니다."}],
+  pat:{frame:"Where is ___?",items:[
+      {w:"the restroom",wk:"화장실",en:"Where is the restroom?",say:"웨어 이즈 더 레스트룸?",ko:"화장실이 어디예요?"},
+      {w:"the bus stop",wk:"버스 정류장",en:"Where is the bus stop?",say:"웨어 이즈 더 버스 스탑?",ko:"버스 정류장이 어디예요?"},
+      {w:"the hotel",wk:"호텔",en:"Where is the hotel?",say:"웨어 이즈 더 호텔?",ko:"호텔이 어디예요?"}]},
+  talk:[{them:"",ko:"지나가는 사람이 보여요. 먼저 말을 걸어 보세요.",you:0},{them:"Yes? Can I help you?",ko:"네? 도와드릴까요?",you:1},
+        {them:"Go straight. It's on your left.",ko:"쭉 가세요. 왼쪽에 있어요.",you:2},{them:"No, just five minutes.",ko:"아니요, 5분이면 돼요.",you:3}]},
+ {id:"l7",title:"택시 타기",sub:"택시 안에서",
+  ph:[{en:"To the airport, please.",say:"투 디 에어포트, 플리즈",ko:"공항으로 가 주세요."},
+      {en:"How long does it take?",say:"하우 롱 더즈 잇 테이크?",ko:"얼마나 걸려요?"},
+      {en:"Please stop here.",say:"플리즈 스탑 히어",ko:"여기서 세워 주세요."},
+      {en:"Keep the change.",say:"킵 더 체인지",ko:"잔돈은 괜찮아요."}],
+  pat:{frame:"To ___, please.",items:[
+      {w:"the hotel",wk:"호텔",en:"To the hotel, please.",say:"투 더 호텔, 플리즈",ko:"호텔로 가 주세요."},
+      {w:"the station",wk:"역",en:"To the station, please.",say:"투 더 스테이션, 플리즈",ko:"역으로 가 주세요."},
+      {w:"this address",wk:"이 주소",en:"To this address, please.",say:"투 디스 어드레스, 플리즈",ko:"이 주소로 가 주세요."}]},
+  talk:[{them:"Hi! Where to?",ko:"안녕하세요! 어디로 가세요?",you:0},{them:"Sure, no problem.",ko:"네, 알겠습니다.",you:1},
+        {them:"We are almost there.",ko:"거의 다 왔어요.",you:2},{them:"It's fifteen dollars.",ko:"15달러예요.",you:3}]},
+ {id:"l8",title:"호텔 체크인",sub:"호텔 프런트에서",
+  ph:[{en:"I have a reservation.",say:"아이 해브 어 레저베이션",ko:"예약했어요."},
+      {en:"My name is Kim.",say:"마이 네임 이즈 킴",ko:"제 이름은 김이에요."},
+      {en:"What time is breakfast?",say:"왓 타임 이즈 브렉퍼스트?",ko:"아침 식사는 몇 시예요?"},
+      {en:"Can I have the Wi-Fi password?",say:"캔 아이 해브 더 와이파이 패스워드?",ko:"와이파이 비밀번호 알려 주시겠어요?"}],
+  pat:{frame:"What time is ___?",items:[
+      {w:"checkout",wk:"체크아웃",en:"What time is checkout?",say:"왓 타임 이즈 체크아웃?",ko:"체크아웃은 몇 시예요?"},
+      {w:"lunch",wk:"점심",en:"What time is lunch?",say:"왓 타임 이즈 런치?",ko:"점심은 몇 시예요?"},
+      {w:"dinner",wk:"저녁",en:"What time is dinner?",say:"왓 타임 이즈 디너?",ko:"저녁은 몇 시예요?"}]},
+  talk:[{them:"Good evening. How can I help you?",ko:"안녕하세요. 무엇을 도와드릴까요?",you:0},{them:"May I have your name?",ko:"성함이 어떻게 되세요?",you:1},
+        {them:"Here is your key. Room 502.",ko:"여기 열쇠요. 502호입니다.",you:2},{them:"From seven to ten. Anything else?",ko:"7시부터 10시까지예요. 더 필요한 건요?",you:3}]},
+ {id:"l9",title:"못 알아들었을 때",sub:"길에서 도움을 청하며",
+  ph:[{en:"Can you help me?",say:"캔 유 헬프 미?",ko:"도와주실 수 있어요?"},
+      {en:"I don't understand.",say:"아이 돈트 언더스탠드",ko:"이해를 못 했어요."},
+      {en:"Please speak slowly.",say:"플리즈 스픽 슬로울리",ko:"천천히 말해 주세요."},
+      {en:"One more time, please.",say:"원 모어 타임, 플리즈",ko:"한 번만 더 말해 주세요."}],
+  pat:{frame:"Can you ___?",items:[
+      {w:"write it down",wk:"적어 주다",en:"Can you write it down?",say:"캔 유 라이트 잇 다운?",ko:"적어 주실 수 있어요?"},
+      {w:"take a picture",wk:"사진 찍어 주다",en:"Can you take a picture?",say:"캔 유 테이크 어 픽처?",ko:"사진 찍어 주실 수 있어요?"},
+      {w:"wait a moment",wk:"잠깐 기다리다",en:"Can you wait a moment?",say:"캔 유 웨이트 어 모먼트?",ko:"잠깐 기다려 주실 수 있어요?"}]},
+  talk:[{them:"",ko:"길을 잃었어요. 지나가는 사람에게 도움을 청해 보세요.",you:0},
+        {them:"Sure. Go two blocks and turn right at the bank.",ko:"물론이죠. 두 블록 가서 은행에서 오른쪽으로 도세요.",you:1},
+        {them:"Oh, sorry. Are you a tourist?",ko:"아, 미안해요. 여행 오셨어요?",you:2},{them:"Okay. Go... two blocks.",ko:"네. 두 블록... 가세요.",you:3}]}
 ];
-const SPK='<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
+const UNITS=[{name:"만남과 인사",ids:["l1","l2","l10"]},{name:"가게에서",ids:["l3","l5","l6"]},{name:"여행 중에",ids:["l4","l7","l8","l9"]}];
+const LMAP={};L.forEach(l=>{LMAP[l.id]=l;});
+const ORDER=UNITS.flatMap(u=>u.ids);
+const INT=[1,2,4,7,15,30,60];
+
+/* ---------- icons ---------- */
+const I={
+ mic:'<svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>',
+ spk:'<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+ spkL:'<svg viewBox="0 0 24 24" width="44" height="44" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+ x:'<svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+ chk:'<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+ go:'<svg class="go" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 5l7 7-7 7"/></svg>',
+ home:'<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true"><path d="M12 3l9 8h-2.5v9h-5v-6h-3v6h-5v-9H3l9-8z"/></svg>',
+ book:'<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true"><path d="M5 4h10a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3V4zm3 13a1 1 0 0 0 0 2h8v-2H8z"/></svg>',
+ chart:'<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true"><rect x="4" y="12" width="4" height="8" rx="1"/><rect x="10" y="5" width="4" height="15" rx="1"/><rect x="16" y="9" width="4" height="11" rx="1"/></svg>'
+};
 const $=(s,r)=>(r||document).querySelector(s);
-const app=$("#app");
+const app=$("#app"),chrome=$("#chrome");
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
-const mk=(tag,cls,text)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(text!=null)e.textContent=text;return e;};
-const byId=id=>LESSONS.find(l=>l.id===id)||LESSONS[0];
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
 
 /* ---------- progress ---------- */
 const KEY="hanmadi-progress";
-let P={done:{},streak:0,lastDay:"",count:0};
-const savedTo="이 휴대폰";
 const dayStr=d=>d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 const today=()=>dayStr(new Date());
-const yesterday=()=>{const d=new Date();d.setDate(d.getDate()-1);return dayStr(d);};
-function clean(o){
-  o=o||{};
-  return {done:Object.assign({},o.done||{}),streak:Number(o.streak)||0,lastDay:String(o.lastDay||""),count:Number(o.count)||0};
+const plusDays=n=>{const d=new Date();d.setDate(d.getDate()+n);return dayStr(d);};
+let P={done:{},days:{},cards:{}};
+function load(){
+  try{
+    const o=JSON.parse(localStorage.getItem(KEY)||"{}")||{};
+    P.done=Object.assign({},o.done||{});
+    P.days=Object.assign({},o.days||{});
+    P.cards=Object.assign({},o.cards||{});
+    if(!o.days&&o.lastDay)P.days[o.lastDay]=Number(o.count)||1;
+  }catch(e){}
+  Object.keys(P.done).forEach(id=>{if(LMAP[id])addCards(LMAP[id],today());});
 }
-function liveStreak(){return (P.lastDay===today()||P.lastDay===yesterday())?P.streak:0;}
-function save(){
-  try{localStorage.setItem(KEY,JSON.stringify(P));}catch(e){}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(P));}catch(e){}}
+function addCards(l,due){
+  l.ph.forEach((p,i)=>{const k=l.id+":"+i;if(!P.cards[k])P.cards[k]={lv:0,due:due};});
+  l.pat.items.forEach((p,i)=>{const k=l.id+":p"+i;if(!P.cards[k])P.cards[k]={lv:0,due:due};});
 }
-try{const raw=localStorage.getItem(KEY);if(raw)P=clean(JSON.parse(raw));}catch(e){}
+function cardData(k){
+  const a=k.split(":"),l=LMAP[a[0]];
+  if(!l||!a[1])return null;
+  return a[1][0]==="p"?(l.pat.items[+a[1].slice(1)]||null):(l.ph[+a[1]]||null);
+}
+function dueKeys(){const t=today();return Object.keys(P.cards).filter(k=>P.cards[k].due<=t&&cardData(k));}
+function streak(){
+  const d=new Date();
+  if(!P.days[dayStr(d)])d.setDate(d.getDate()-1);
+  let n=0;
+  while(P.days[dayStr(d)]){n++;d.setDate(d.getDate()-1);}
+  return n;
+}
+const nextLesson=()=>LMAP[ORDER.find(id=>!P.done[id])]||null;
 
 /* ---------- speech ---------- */
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-let noMic=!SR,rec=null,micCb=null;
-if(SR)document.body.classList.add("has-mic");
-if("speechSynthesis" in window){document.body.classList.add("has-tts");try{speechSynthesis.getVoices();}catch(e){}}
-function speak(text){
-  if(!text||!("speechSynthesis" in window))return;
-  try{const u=new SpeechSynthesisUtterance(text);u.lang="en-US";u.rate=0.85;speechSynthesis.cancel();speechSynthesis.speak(u);}catch(e){}
+const TTS="speechSynthesis" in window;
+let rec=null;
+if(TTS){try{speechSynthesis.getVoices();}catch(e){}}
+function speak(text,rate){
+  if(!text||!TTS)return;
+  try{const u=new SpeechSynthesisUtterance(text);u.lang="en-US";u.rate=rate||0.9;speechSynthesis.cancel();speechSynthesis.speak(u);}catch(e){}
 }
 function stopMic(){if(rec){try{rec.abort();}catch(e){}rec=null;}}
 
 /* ---------- grading ---------- */
-const FIX={"i'm":"i am","im":"i am","i'll":"i will","it's":"it is","2":"two","5":"five","ok":"okay","thankyou":"thank you","thanks":"thank you"};
+const FIX={"i'm":"i am","im":"i am","i'll":"i will","it's":"it is","its":"it is","don't":"do not","dont":"do not","how's":"how is",
+  "1":"one","2":"two","3":"three","4":"four","5":"five","ok":"okay","thankyou":"thank you","thanks":"thank you",
+  "checkout":"check out","wi-fi":"wifi","restroom":"rest room","latte":"latte"};
 function toks(w){
-  w=w.toLowerCase().replace(/[’‘`]/g,"'").replace(/[^a-z0-9']/g,"");
+  w=w.toLowerCase().replace(/[’‘`]/g,"'").replace(/[^a-z0-9'-]/g,"").replace(/^-+|-+$/g,"");
   if(!w)return [];
+  w=FIX[w]||w.replace(/-/g,"");
   return (FIX[w]||w).split(" ");
 }
 function grade(target,said){
@@ -271,19 +372,160 @@ function grade(target,said){
   return {score:m?dp[m][n]/m:0,words};
 }
 
-/* ---------- input ---------- */
-function inputBox(onSubmit,inputId,ph){
-  const el=mk("div","inbox");
-  el.innerHTML='<button type="button" class="mic" aria-pressed="false"><span class="dot" aria-hidden="true"></span><span class="lbl">눌러서 말하기</span></button>'
-    +'<p class="heard" aria-live="polite"></p>'
-    +'<form class="typeform"><label class="sr" for="'+inputId+'">영어로 입력</label>'
-    +'<input id="'+inputId+'" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="'+esc(ph)+'">'
-    +'<button type="submit" class="btn small">확인</button></form>';
-  const mic=$(".mic",el),heard=$(".heard",el),form=$("form",el),input=$("input",el),lbl=$(".lbl",mic);
-  const me={};micCb=me;
-  const setOn=on=>{mic.classList.toggle("on",on);mic.setAttribute("aria-pressed",String(on));lbl.textContent=on?"듣는 중… 말해 보세요":"눌러서 말하기";};
+/* ---------- tabs ---------- */
+let tab="today",S=null;
+function tabsHtml(){
+  const t=[["today","오늘",I.home],["lessons","수업",I.book],["stats","기록",I.chart]];
+  return '<nav class="tabs fixed" aria-label="메뉴">'+t.map(x=>'<button type="button" data-tab="'+x[0]+'" class="'+(tab===x[0]?"on":"")+'"'+(tab===x[0]?' aria-current="page"':"")+'>'+x[2]+x[1]+'</button>').join("")+'</nav>';
+}
+function show(){
+  stopMic();S=null;
+  if(tab==="today")viewToday();else if(tab==="lessons")viewLessons();else viewStats();
+  chrome.querySelectorAll("[data-tab]").forEach(b=>b.addEventListener("click",()=>{tab=b.dataset.tab;show();window.scrollTo(0,0);}));
+  document.querySelectorAll("[data-lesson]").forEach(b=>b.addEventListener("click",()=>startLesson(b.dataset.lesson)));
+  document.querySelectorAll("[data-review]").forEach(b=>b.addEventListener("click",startReview));
+}
+function viewToday(){
+  const d=new Date(),due=dueKeys().length,nl=nextLesson(),st=streak(),did=!!P.days[today()];
+  const dn=["일","월","화","수","목","금","토"];
+  const mon=new Date(d);mon.setDate(d.getDate()-((d.getDay()+6)%7));
+  let week="";
+  for(let k=0;k<7;k++){
+    const x=new Date(mon);x.setDate(mon.getDate()+k);
+    const ds=dayStr(x),cls=(P.days[ds]?"did ":"")+(ds===today()?"now":"");
+    week+='<li class="'+cls+'"><i>'+I.chk+'</i>'+dn[x.getDay()]+'</li>';
+  }
+  const hero=st>1?st+"일째 이어가고 있어요":did?"오늘 연습을 마쳤어요":due?"배운 문장부터 다시 꺼내 봐요":"오늘 네 문장만 말해 봐요";
+  app.innerHTML='<p class="date">'+(d.getMonth()+1)+'월 '+d.getDate()+'일 '+dn[d.getDay()]+'요일</p><h1 class="hero">'+hero+'</h1>'
+   +'<ol class="week" aria-label="이번 주 연습한 날">'+week+'</ol>'
+   +'<h2 class="sec">오늘 할 일</h2><ul class="rows">'
+   +'<li><button type="button" class="row'+(due?"":" off")+'" '+(due?"data-review":"disabled")+'><span class="ic'+(due?"":" done")+'">'+(due?due:I.chk)+'</span><span class="tx"><b>복습</b><small>'+(due?"잊기 전에 다시 말해 볼 문장 "+due+"개":"지금 복습할 문장이 없어요")+'</small></span>'+(due?I.go:"")+'</button></li>'
+   +(nl?'<li><button type="button" class="row" data-lesson="'+nl.id+'"><span class="ic">'+(ORDER.indexOf(nl.id)+1)+'</span><span class="tx"><b>'+esc(nl.title)+'</b><small>새 수업 · '+esc(nl.sub)+'</small></span>'+I.go+'</button></li>'
+        :'<li><div class="row off"><span class="ic done">'+I.chk+'</span><span class="tx"><b>모든 수업 완료</b><small>복습으로 내 것으로 만들어요</small></span></div></li>')
+   +'</ul>'
+   +(SR?"":'<p class="note">이 브라우저에서는 마이크를 쓸 수 없어 글자로 입력해요. 크롬 앱에서 열면 소리 내어 연습할 수 있어요.</p>');
+  const act=due?'<button type="button" class="cta" data-review>복습 시작하기</button>':nl?'<button type="button" class="cta" data-lesson="'+nl.id+'">수업 시작하기</button>':"";
+  chrome.innerHTML=(act?'<div class="cta-wrap fixed">'+act+'</div>':"")+tabsHtml();
+}
+function viewLessons(){
+  const nl=nextLesson();
+  let h='<h1 class="ptitle">수업</h1>';
+  UNITS.forEach(u=>{
+    h+='<h2 class="unit">'+u.name+'</h2><ul class="rows">'+u.ids.map(id=>{
+      const l=LMAP[id],dn=P.done[id];
+      return '<li><button type="button" class="row" data-lesson="'+id+'"><span class="ic'+(dn?" done":"")+'">'+(dn?I.chk:ORDER.indexOf(id)+1)+'</span><span class="tx"><b>'+esc(l.title)+'</b><small>'+esc(l.sub)+'</small></span>'+(nl&&nl.id===id?'<span class="chip">다음 수업</span>':I.go)+'</button></li>';
+    }).join("")+'</ul>';
+  });
+  app.innerHTML=h;chrome.innerHTML=tabsHtml();
+}
+function viewStats(){
+  const keys=Object.keys(P.cards).filter(cardData),mine=keys.filter(k=>P.cards[k].lv>=4).length;
+  const dn=["일","월","화","수","목","금","토"];
+  const days=[];for(let k=6;k>=0;k--){const x=new Date();x.setDate(x.getDate()-k);days.push({n:P.days[dayStr(x)]||0,d:dn[x.getDay()],now:k===0});}
+  const mx=Math.max(1,...days.map(x=>x.n));
+  app.innerHTML='<h1 class="ptitle">기록</h1><div class="big"><b>'+streak()+'</b><span>일 연속</span></div>'
+   +'<div class="three"><div><b>'+keys.length+'</b><span>배운 문장</span></div><div><b>'+(keys.length-mine)+'</b><span>익히는 중</span></div><div><b>'+mine+'</b><span>내 것이 된 문장</span></div></div>'
+   +'<h2 class="sec">최근 7일 동안 말한 횟수</h2><ol class="bars">'
+   +days.map(x=>'<li class="'+(x.now?"now":"")+'"><span>'+x.n+'</span><span class="col" style="height:'+Math.round(x.n/mx*100)+'%"></span><span>'+x.d+'</span></li>').join("")+'</ol>'
+   +'<p class="note">배운 문장은 1일, 2일, 4일, 7일, 15일 뒤에 다시 물어봐요. 힌트 없이 네 번 연달아 맞히면 내 것이 된 문장으로 넘어가요. 기록은 이 휴대폰에 저장돼요.</p>';
+  chrome.innerHTML=tabsHtml();
+}
+
+/* ---------- session ---------- */
+function startLesson(id){
+  const l=LMAP[id],q=[];
+  l.ph.forEach(p=>q.push({t:"learn",p:p,en:p.en}));
+  if(TTS)shuffle([0,1,2,3]).slice(0,2).forEach(i=>{
+    const others=shuffle(l.ph.filter((x,k)=>k!==i)).slice(0,2).map(x=>x.ko);
+    q.push({t:"listen",p:l.ph[i],opts:shuffle([l.ph[i].ko].concat(others))});
+  });
+  shuffle(l.ph).forEach(p=>q.push({t:"recall",p:p,en:p.en}));
+  q.push({t:"frame",l:l});
+  l.pat.items.forEach(p=>q.push({t:"pat",p:p,en:p.en,l:l}));
+  l.talk.forEach(tk=>q.push({t:"talk",tk:tk,p:l.ph[tk.you],en:l.ph[tk.you].en,l:l}));
+  S={kind:"lesson",id:id,q:q,i:0,said:0};showEx();
+}
+function startReview(){
+  const q=shuffle(dueKeys()).slice(0,12).map(k=>{const p=cardData(k);return {t:"recall",p:p,en:p.en,card:k};});
+  if(!q.length)return;
+  S={kind:"review",q:q,i:0,said:0};showEx();
+}
+const auds=en=>TTS?'<div class="auds"><button type="button" class="aud" data-say="'+esc(en)+'" data-rate="0.9">'+I.spk+'듣기</button><button type="button" class="aud" data-say="'+esc(en)+'" data-rate="0.55">천천히</button></div>':"";
+const hidden=p=>'<button type="button" class="txt hintb" id="hint">힌트 보기</button><div class="ans" id="ans" hidden><p class="en" lang="en">'+esc(p.en)+'</p><p class="say">'+esc(p.say)+'</p>'+auds(p.en)+'</div>';
+function showEx(){
+  stopMic();
+  const ex=S.q[S.i],p=ex.p;
+  S.first=true;S.hint=false;S.fails=0;
+  let m="",auto="";
+  if(ex.t==="learn"){
+    m='<p class="inst">듣고 따라 말해요</p><h1 class="en" lang="en">'+esc(p.en)+'</h1><p class="say">'+esc(p.say)+'</p><p class="ko">'+esc(p.ko)+'</p>'+auds(p.en);
+    auto=p.en;
+  }else if(ex.t==="listen"){
+    m='<p class="inst">잘 듣고 뜻을 골라요</p><button type="button" class="bigplay" data-say="'+esc(p.en)+'" data-rate="0.9" aria-label="다시 듣기">'+I.spkL+'</button>'
+     +'<div class="opts">'+ex.opts.map(o=>'<button type="button" class="opt">'+esc(o)+'</button>').join("")+'</div>';
+    auto=p.en;
+  }else if(ex.t==="recall"){
+    m='<p class="inst">'+(S.kind==="review"?"기억나는 대로 영어로 말해요":"이번엔 안 보고 영어로 말해요")+'</p><h1 class="koq">'+esc(p.ko)+'</h1>'+hidden(p);
+  }else if(ex.t==="frame"){
+    const f=esc(ex.l.pat.frame).replace("___","<u>&nbsp;</u>");
+    m='<p class="inst">단어만 바꾸면 새 문장이 돼요</p><h1 class="frame" lang="en">'+f+'</h1><ul class="swap">'
+     +ex.l.pat.items.map(x=>'<li><b lang="en">'+esc(x.w)+'</b><span>'+esc(x.wk)+'</span></li>').join("")+'</ul>';
+  }else if(ex.t==="pat"){
+    const f=esc(ex.l.pat.frame).replace("___","<u>&nbsp;</u>");
+    m='<p class="inst">빈칸에 넣어 말해요</p><h1 class="koq">'+esc(p.ko)+'</h1><p class="say" lang="en">'+f+'</p><span class="word">'+esc(p.wk)+' = '+esc(p.w)+'</span>'+hidden(p);
+  }else{
+    const tk=ex.tk;
+    m='<p class="inst">'+esc(ex.l.sub)+'</p>'
+     +(tk.them?'<div class="them"><p class="t-en" lang="en">'+esc(tk.them)+'</p><p class="t-ko">'+esc(tk.ko)+'</p></div>'+auds(tk.them):'<p class="narr">'+esc(tk.ko)+'</p>')
+     +'<div class="reply"><small>이렇게 답해요</small><h1 class="koq">'+esc(p.ko)+'</h1>'+hidden(p)+'</div>';
+    auto=tk.them;
+  }
+  app.innerHTML='<header class="sbar"><button type="button" class="x" id="quit" aria-label="그만하기">'+I.x+'</button><div class="prog" role="progressbar" aria-valuemin="0" aria-valuemax="'+S.q.length+'" aria-valuenow="'+S.i+'"><i style="width:'+Math.round(S.i/S.q.length*100)+'%"></i></div></header><main class="ex">'+m+'</main>';
+  chrome.innerHTML='<div class="dock fixed" id="dock"></div>';
+  window.scrollTo(0,0);
+  $("#quit").addEventListener("click",()=>{save();show();});
+  bindAud(app);
+  const hb=$("#hint");
+  if(hb)hb.addEventListener("click",()=>{S.hint=true;reveal();});
+  if(ex.t==="listen")bindListen(ex);
+  else if(ex.t==="frame"){
+    $("#dock").innerHTML='<button type="button" class="cta" id="nx">말해 볼게요</button>';
+    $("#nx").addEventListener("click",next);
+  }else dockMic(ex);
+  if(auto)speak(auto,0.9);
+}
+function bindAud(root){root.querySelectorAll("[data-say]").forEach(b=>b.addEventListener("click",()=>{stopMic();speak(b.dataset.say,+b.dataset.rate);}));}
+function reveal(){const a=$("#ans"),h=$("#hint");if(a){a.hidden=false;bindOnce(a);}if(h)h.hidden=true;}
+function bindOnce(a){if(a.dataset.b)return;a.dataset.b="1";bindAud(a);}
+function next(){
+  S.i++;
+  if(S.i>=S.q.length)finish();else showEx();
+}
+function bindListen(ex){
+  const dock=$("#dock");
+  app.querySelectorAll(".opt").forEach(b=>b.addEventListener("click",()=>{
+    if(b.textContent===ex.p.ko){
+      app.querySelectorAll(".opt").forEach(o=>{o.disabled=true;});
+      b.classList.add("ok");
+      dock.className="dock fixed ok";
+      dock.innerHTML='<div class="fb"><p class="fb-t">맞아요</p><p class="words" lang="en">'+esc(ex.p.en)+'</p><p class="sub">'+esc(ex.p.say)+'</p><button type="button" class="cta" id="nx">다음</button></div>';
+      $("#nx").addEventListener("click",next);
+    }else{b.classList.add("no");b.disabled=true;}
+  }));
+}
+function dockMic(ex){
+  const dock=$("#dock");
+  dock.className="dock fixed";
+  dock.innerHTML='<p class="heard" id="heard" aria-live="polite"></p>'
+   +(SR?'<button type="button" class="micbtn" id="mic" aria-label="눌러서 말하기">'+I.mic+'</button><p class="mic-l" id="micl">눌러서 말하기</p><button type="button" class="txt" id="kb">키보드로 입력</button>':"")
+   +'<form class="kf" id="kf"'+(SR?" hidden":"")+'><label class="sr" for="kin">영어로 입력</label><input id="kin" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="영어로 입력"><button type="submit">확인</button></form>';
+  const heard=$("#heard"),kf=$("#kf"),kin=$("#kin");
+  kf.addEventListener("submit",e=>{e.preventDefault();const t=kin.value.trim();if(t)answer(ex,t,[]);});
+  if(!SR)return;
+  const mic=$("#mic"),micl=$("#micl");
+  $("#kb").addEventListener("click",()=>{kf.hidden=false;$("#kb").hidden=true;kin.focus();});
+  const setOn=on=>{mic.classList.toggle("on",on);micl.textContent=on?"듣고 있어요":"눌러서 말하기";};
   mic.addEventListener("click",()=>{
-    if(!SR)return;
     if(rec){try{rec.stop();}catch(e){}return;}
     try{speechSynthesis.cancel();}catch(e){}
     const r=new SR();rec=r;
@@ -295,142 +537,70 @@ function inputBox(onSubmit,inputId,ph){
       let live="";
       for(let i=e.resultIndex;i<e.results.length;i++){
         const res=e.results[i];
-        if(res.isFinal){
-          finals.push(res[0].transcript);
-          if(finals.length===1)for(let k=1;k<res.length;k++)alts.push(res[k].transcript);
-        }else live+=res[0].transcript;
+        if(res.isFinal){finals.push(res[0].transcript);if(finals.length===1)for(let k=1;k<res.length;k++)alts.push(res[k].transcript);}
+        else live+=res[0].transcript;
       }
       heard.textContent=(finals.join(" ")+" "+live).trim();
     };
     r.onerror=e=>{err=e.error||"error";};
     r.onend=()=>{
       if(rec===r)rec=null;
+      if(!mic.isConnected||err==="aborted")return;
       setOn(false);
-      if(micCb!==me||err==="aborted")return;
-      if(err==="not-allowed"||err==="service-not-allowed"){heard.textContent="마이크 권한이 꺼져 있어요. 주소창 왼쪽 아이콘을 눌러 마이크를 허용해 주세요.";return;}
+      if(err==="not-allowed"||err==="service-not-allowed"){heard.textContent="마이크 권한이 꺼져 있어요. 주소창 왼쪽 아이콘에서 마이크를 허용해 주세요.";return;}
       const text=finals.join(" ").trim();
-      if(!text){heard.textContent="소리가 들리지 않았어요. 한 번 더 눌러 말해 보세요.";return;}
-      heard.textContent="";onSubmit(text,finals.length===1?alts:[]);
+      if(!text){heard.textContent="잘 안 들렸어요. 한 번 더 눌러 말해 주세요.";return;}
+      answer(ex,text,finals.length===1?alts:[]);
     };
-    try{r.start();}catch(e){rec=null;setOn(false);heard.textContent="마이크를 켤 수 없어요. 아래에 글자로 입력해 주세요.";}
+    try{r.start();}catch(e){rec=null;setOn(false);heard.textContent="마이크를 켤 수 없어요. 키보드로 입력해 주세요.";}
   });
-  form.addEventListener("submit",e=>{e.preventDefault();const t=input.value.trim();input.value="";if(t)onSubmit(t,[]);});
-  return el;
 }
-function gradedBox(target,onNext){
-  const wrap=mk("div","answer"),res=mk("div","result");res.hidden=true;
-  let fails=0;
-  const box=inputBox((text,alts)=>{
-    let g=grade(target,text);
-    (alts||[]).forEach(a=>{const x=grade(target,a);if(x.score>g.score){g=x;text=a;}});
-    const ok=g.score>=0.7;
-    res.hidden=false;res.textContent="";
-    const words=mk("p","words");
-    g.words.forEach(w=>{words.append(mk("span",w.hit?"w hit":"w miss",w.text)," ");});
-    res.append(
-      mk("p","verdict "+(ok?"ok":"no"),ok?(g.score===1?"완벽해요!":"좋아요, 충분히 통해요!"):"조금만 더요. 점선 표시된 단어를 다시 말해 보세요."),
-      words,mk("p","said","내가 한 말: "+text));
-    if(ok){
-      const b=mk("button","btn primary","다음");b.type="button";b.addEventListener("click",onNext);
-      res.append(b);box.hidden=true;stopMic();b.focus();
-    }else{
-      fails++;
-      if(fails>=2){const b=mk("button","btn ghost","일단 넘어가기");b.type="button";b.addEventListener("click",onNext);res.append(b);}
-    }
-  },"ans-input","영어로 입력해도 돼요");
-  wrap.append(box,res);
-  return wrap;
-}
-
-/* ---------- views ---------- */
-let view={name:"home"};
-function go(v){stopMic();view=v;render();window.scrollTo(0,0);}
-function render(){
-  micCb=null;
-  if(view.name==="home")home();
-  else if(view.name==="lesson")lesson();
-  else done();
-  app.querySelectorAll("[data-home]").forEach(b=>b.addEventListener("click",()=>go({name:"home"})));
-  app.querySelectorAll("[data-start]").forEach(b=>b.addEventListener("click",()=>go({name:"lesson",id:b.dataset.start,step:0,i:0,hint:false})));
-  app.querySelectorAll("[data-say]").forEach(b=>b.addEventListener("click",()=>speak(b.dataset.say)));
-}
-const sayBtn=(text,label)=>'<button type="button" class="say" data-say="'+esc(text)+'">'+SPK+(label||"듣기")+'</button>';
-
-function home(){
-  const doneN=LESSONS.filter(l=>P.done[l.id]).length,allDone=doneN===LESSONS.length;
-  const next=LESSONS.find(l=>!P.done[l.id])||LESSONS[0];
-  app.innerHTML=
-   '<header class="top"><h1>한마디 영어</h1><p>하루 네 문장, 소리 내어 말하는 연습</p></header>'
-  +'<section class="stats" aria-label="내 기록"><div class="streak"><span class="num">'+liveStreak()+'</span><span class="unit">일 연속</span></div>'
-  +'<dl><div><dt>끝낸 수업</dt><dd>'+doneN+' / '+LESSONS.length+'</dd></div><div><dt>말한 문장</dt><dd>'+P.count+'</dd></div></dl></section>'
-  +'<section class="today"><p class="eyebrow">'+(allDone?"복습하기":"오늘의 수업")+'</p><h2>'+esc(next.title)+'</h2><p class="muted">'+esc(next.place)+'</p>'
-  +'<p class="peek"><span>'+esc(next.phrases[0].en)+'</span></p>'
-  +'<button type="button" class="btn primary" data-start="'+next.id+'">시작하기</button>'
-  +'</section>'
-  +'<section><h3>전체 수업</h3><ol class="list">'
-  +LESSONS.map((l,i)=>'<li><button type="button" data-start="'+l.id+'"><span class="n">'+(i+1)+'</span><span class="t"><b>'+esc(l.title)+'</b><small>'+esc(l.place)+'</small></span><span class="pill'+(P.done[l.id]?" ok":"")+'">'+(P.done[l.id]?"완료":"시작 전")+'</span></button></li>').join("")
-  +'</ol></section>'
-  +(noMic?'<p class="note">이 브라우저에서는 마이크를 쓸 수 없어요. 크롬 앱에서 이 주소를 열면 소리 내어 연습할 수 있어요.</p>':'')
-  +'<footer>기록은 '+savedTo+'에 저장돼요.</footer>';
-}
-
-function lesson(){
-  const l=byId(view.id),names=["배우기","따라 말하기","대화하기"];
-  let h='<nav class="bar" aria-label="수업 단계"><button type="button" class="back" data-home>나가기</button><ol class="steps">'
-    +names.map((s,k)=>'<li class="'+(k===view.step?"on":k<view.step?"past":"")+'">'+s+'</li>').join("")+'</ol></nav>';
-  if(view.step===0){
-    h+='<div class="lead"><h2>'+esc(l.title)+'</h2><p>오늘 배울 네 문장이에요. 듣고 소리 내어 읽어 보세요.</p></div><div class="cards">'
-      +l.phrases.map(p=>'<article class="card"><p class="en" lang="en">'+esc(p.en)+'</p><p class="hangul">'+esc(p.say)+'</p><p class="ko">'+esc(p.ko)+'</p>'+sayBtn(p.en)+'</article>').join("")
-      +'</div><button type="button" class="btn primary" id="to-repeat">따라 말하러 가기</button>';
-    app.innerHTML=h;
-    $("#to-repeat").addEventListener("click",()=>{view.step=1;view.i=0;render();window.scrollTo(0,0);});
-    return;
+function answer(ex,text,alts){
+  let g=grade(ex.en,text);
+  (alts||[]).forEach(a=>{const x=grade(ex.en,a);if(x.score>g.score){g=x;text=a;}});
+  const ok=g.score>=0.7,dock=$("#dock");
+  const words=g.words.map(w=>'<span class="w '+(w.hit?"hit":"miss")+'">'+esc(w.text)+'</span>').join(" ");
+  if(ok){
+    const clean=S.first&&!S.hint;
+    S.said++;P.days[today()]=(P.days[today()]||0)+1;
+    if(ex.card)grow(ex.card,clean);
+    save();
+    try{navigator.vibrate&&navigator.vibrate(20);}catch(e){}
+    reveal();
+    dock.className="dock fixed ok";
+    dock.innerHTML='<div class="fb"><p class="fb-t">'+(g.score===1?"정확해요":"좋아요, 통해요")+'</p><p class="words" lang="en">'+words+'</p><button type="button" class="cta" id="nx">다음</button></div>';
+    $("#nx").addEventListener("click",next);
+  }else{
+    S.first=false;S.fails++;
+    reveal();
+    dock.className="dock fixed no";
+    dock.innerHTML='<div class="fb"><p class="fb-t">조금만 더요</p><p class="words" lang="en">'+words+'</p><p class="sub">내가 한 말: '+esc(text)+'</p><button type="button" class="cta dark" id="re">다시 말하기</button>'
+     +(S.fails>=2?'<button type="button" class="txt" id="skip">일단 넘어가기</button>':"")+'</div>';
+    $("#re").addEventListener("click",()=>dockMic(ex));
+    const sk=$("#skip");
+    if(sk)sk.addEventListener("click",()=>{if(ex.card){grow(ex.card,false);save();}next();});
   }
-  if(view.step===1){
-    const p=l.phrases[view.i];
-    h+='<div class="lead"><h2>따라 말해 보세요</h2><p class="count">'+(view.i+1)+' / '+l.phrases.length+'</p></div>'
-      +'<section class="focus"><p class="ko">'+esc(p.ko)+'</p><p class="en" lang="en">'+esc(p.en)+'</p><p class="hangul">'+esc(p.say)+'</p>'+sayBtn(p.en)+'</section>'
-      +'<div id="slot"></div>';
-    app.innerHTML=h;
-    $("#slot").appendChild(gradedBox(p.en,()=>{
-      if(view.i<l.phrases.length-1)view.i++;else{view.step=2;view.i=0;view.hint=false;}
-      render();window.scrollTo(0,0);
-    }));
-    return;
-  }
-  const t=l.talk[view.i],p=l.phrases[t.you];
-  h+='<div class="lead"><h2>'+esc(l.place)+'</h2><p class="count">대화 '+(view.i+1)+' / '+l.talk.length+'</p></div>'
-    +(t.them
-      ?'<div class="bubble"><p class="en" lang="en">'+esc(t.them)+'</p><p class="ko">'+esc(t.ko)+'</p>'+sayBtn(t.them)+'</div>'
-      :'<div class="bubble sys">'+esc(t.ko)+'</div>')
-    +'<section class="task"><p class="eyebrow">영어로 답해 보세요</p><p class="ko">'+esc(p.ko)+'</p>'
-    +(view.hint?'<p class="en" lang="en">'+esc(p.en)+'</p><p class="hangul">'+esc(p.say)+'</p>':'<button type="button" class="linkbtn" id="hint">생각이 안 나면 힌트 보기</button>')
-    +'</section><div id="slot"></div>';
-  app.innerHTML=h;
-  const hb=$("#hint");if(hb)hb.addEventListener("click",()=>{stopMic();view.hint=true;render();});
-  $("#slot").appendChild(gradedBox(p.en,()=>{
-    if(view.i<l.talk.length-1){view.i++;view.hint=false;render();window.scrollTo(0,0);}
-    else complete(l);
-  }));
 }
-
-function complete(l){
-  const td=today();
-  if(P.lastDay!==td){P.streak=(P.lastDay===yesterday())?P.streak+1:1;P.lastDay=td;}
-  P.done[l.id]=true;
-  P.count+=l.phrases.length+l.talk.length;
+function grow(k,clean){
+  const c=P.cards[k];if(!c)return;
+  c.lv=clean?Math.min(c.lv+1,INT.length-1):0;
+  c.due=plusDays(INT[c.lv]);
+}
+function finish(){
+  let extra="";
+  if(S.kind==="lesson"){
+    const l=LMAP[S.id];
+    P.done[l.id]=true;addCards(l,plusDays(1));
+    extra='<li><span>내일 복습할 문장</span><b>'+(l.ph.length+l.pat.items.length)+'개</b></li>';
+  }
   save();
-  go({name:"done",id:l.id});
+  const st=streak(),title=S.kind==="lesson"?esc(LMAP[S.id].title)+" 수업을 마쳤어요":"복습을 마쳤어요";
+  app.innerHTML='<div class="fin"><h1>'+title+'</h1><ul class="rows"><li><span>방금 영어로 말한 횟수</span><b>'+S.said+'번</b></li><li><span>연속 학습</span><b>'+st+'일</b></li>'+extra+'</ul></div>';
+  chrome.innerHTML='<div class="dock fixed"><button type="button" class="cta" id="home">확인</button></div>';
+  $("#home").addEventListener("click",()=>{tab="today";show();window.scrollTo(0,0);});
+  S=null;
 }
-function done(){
-  const l=byId(view.id);
-  app.innerHTML='<section class="done"><p class="eyebrow">수업 완료</p><h2>'+esc(l.title)+', 해냈어요</h2>'
-   +'<div class="streak"><span class="num">'+liveStreak()+'</span><span class="unit">일 연속</span></div>'
-   +'<p>방금 영어로 '+(l.phrases.length+l.talk.length)+'번 말했어요. 내일 또 만나요.</p>'
-   +'<button type="button" class="btn ghost" data-home>홈으로</button></section>';
-}
-
-render();
+load();show();
 </script>
 </body>
 </html>
