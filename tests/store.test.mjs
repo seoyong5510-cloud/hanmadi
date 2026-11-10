@@ -91,7 +91,7 @@ test("today's plan and stats",()=>{
   P.done.l1=true;addCards(P,lesson("l1"),"2026-11-10");P.days["2026-11-10"]=5;P.secs["2026-11-10"]=300;P.weak={article:3,"past-tense":1};
   pl=plan(P);
   assert.equal(pl.next.id,"p02");assert.equal(pl.due,12);assert.equal(pl.pct,50);assert.equal(pl.weak.tag,"article");assert.equal(pl.talkLesson.id,"l1");
-  assert.equal(nextLesson(P).id,"l2");
+  assert.equal(nextLesson(P).id,"p02");
   const s=stats(P);
   assert.equal(s.minutes,5);assert.equal(s.days,1);assert.equal(s.streak,1);assert.equal(s.learned,12);assert.equal(s.grammar,null);assert.equal(s.pronLast,null);
   assert.equal(s.levels.find(l=>l.id==="a1").done,1);assert.equal(s.week.length,7);
