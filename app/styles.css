@@ -339,3 +339,8 @@ a.setrow{text-decoration:none;color:inherit}
 .gram[open] summary::after{content:" 접기 ▴"}
 .gram[open] summary{margin-bottom:4px}
 details.gram{margin:8px 0 4px;padding:10px 14px}
+.art.emo{display:grid;place-items:center;line-height:1}
+.art.emo.hero{font-size:96px}
+.art.emo.th{font-size:28px}
+.art.emo.av{font-size:20px}
+.feat .art.emo{font-size:56px}

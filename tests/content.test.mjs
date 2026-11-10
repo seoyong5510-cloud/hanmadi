@@ -8,7 +8,7 @@ const data=loadAll();
 test("six levels, each with lessons",()=>{
   assert.equal(LEVELS.length,6);
   for(const lv of LEVELS){assert.ok(orderOf(lv.id).length>=6,lv.id);assert.ok(unitsOf(lv.id).length>=2,lv.id);}
-  assert.equal(allLessons().length,40);
+  assert.equal(allLessons().length,50);
 });
 test("lesson ids are unique across levels",()=>{
   const ids=LEVELS.flatMap(lv=>orderOf(lv.id));

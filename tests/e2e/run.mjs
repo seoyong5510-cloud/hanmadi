@@ -316,7 +316,7 @@ try{
   await page.context().close();
 
   /* 13. one lesson at each remaining level (level-specific behaviour) */
-  for(const [lv,id,frame] of [["a2","b1","Are you free this Saturday"],["a2p","d1",""],["b1","c1",""],["b2","e1",""],["c1","f1",""]]){
+  for(const [lv,id,frame] of [["a1","m7",""],["a1","m10",""],["a2","b1","Are you free this Saturday"],["a2p","d1",""],["b1","c1",""],["b2","e1",""],["c1","f1",""]]){
     ({page,errors}=await newPage({width:390,height:844},{"hanmadi-v2":JSON.stringify({v:2,level:lv,snd:false,mic:1})}));
     await page.evaluate(([id])=>{
       const l=window.__t.lesson(id);
