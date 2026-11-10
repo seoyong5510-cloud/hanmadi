@@ -1,5 +1,6 @@
 // Tab screens (today, lessons, stats, settings) and first-launch screens (welcome, level test).
 import {P,save,exportData,importData} from "../core/store.js";
+export const VERSION="2026.11.10-5";
 import {LEVELS,LV,levelIndex} from "../core/levels.js";
 import {unitsOf,orderOf,lesson,reviewed} from "../core/content.js";
 import {plan,stats,nextLesson} from "../core/plan.js";
@@ -119,11 +120,18 @@ function viewSettings(){
    +'<h2 class="sec">백업</h2><button type="button" class="setrow" id="exp" style="margin-top:0"><span>기록을 파일로 내보내기</span>'+I.go+'</button>'
    +'<label class="setrow" style="margin-top:0" for="imp"><span>백업 파일에서 가져오기</span>'+I.go+'</label><input id="imp" type="file" accept="application/json,.json" class="sr"><p class="note" id="bkmsg" hidden></p>'
    +'<button type="button" class="setrow" id="share"><span>친구에게 앱 보내기</span>'+I.go+'</button><p class="note" id="sharemsg" hidden></p>'
-   +'<a class="setrow" style="margin-top:0" href="../"><span>예전 버전 열기</span>'+I.go+'</a>';
+   +'<a class="setrow" style="margin-top:0" href="../"><span>예전 버전 열기</span>'+I.go+'</a>'
+   +'<button type="button" class="setrow" id="upd" style="margin-top:0"><span>최신 버전으로 새로 받기</span>'+I.go+'</button><p class="note">버전 '+VERSION+'</p>';
   chrome.innerHTML=tabsHtml();
   $("#retest").addEventListener("click",startTest);
   $("#snd").addEventListener("click",()=>{P.snd=!P.snd;save();show();});
   $$("[data-goal]").forEach(b=>b.addEventListener("click",()=>{P.goal=+b.dataset.goal;save();show();}));
+  $("#upd").addEventListener("click",async()=>{
+    // Throw away saved app files (not the learning record) and load everything again.
+    try{if("caches" in window)await Promise.all((await caches.keys()).map(k=>caches.delete(k)));
+      if("serviceWorker" in navigator)await Promise.all((await navigator.serviceWorker.getRegistrations()).map(r=>r.unregister()));}catch(e){}
+    location.replace(location.pathname+"?u="+Date.now());
+  });
   $("#aiform").addEventListener("submit",async e=>{
     e.preventDefault();
     P.ai={url:$("#aiurl").value.trim().replace(/\/+$/,""),token:$("#aitoken").value.trim()};save();

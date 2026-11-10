@@ -28,5 +28,12 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&!ui.busy&
 // Test hook (only with ?e2e in the address): lets the automated browser test read and seed state.
 const E2E=new URLSearchParams(location.search).has("e2e");
 if(E2E)window.__t={P,save,load,show,ui,lesson:(await import("./core/content.js")).lesson,cardData:(await import("./core/content.js")).cardData,health};
-if(!E2E&&"serviceWorker" in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+if(!E2E&&"serviceWorker" in navigator){
+  // When a new version takes over, reload once (only from a tab screen, never in the middle of a lesson)
+  // so the screen is not left running old files.
+  const had=!!navigator.serviceWorker.controller;
+  let reloaded=false;
+  navigator.serviceWorker.addEventListener("controllerchange",()=>{if(had&&!reloaded&&!ui.busy){reloaded=true;location.reload();}});
+  navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(r=>{r.update().catch(()=>{});document.addEventListener("visibilitychange",()=>{if(!document.hidden)r.update().catch(()=>{});});}).catch(()=>{});
+}
 boot();
