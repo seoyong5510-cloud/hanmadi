@@ -14,6 +14,8 @@ export const errorKo=e=>{
   if(c==="unauthorized")return "접속 암호가 맞지 않아요. 설정에서 확인해 주세요.";
   if(c==="llm_not_configured")return "서버에 AI 키가 아직 등록되지 않았어요.";
   if(c==="speech_not_configured")return "서버에 음성 서비스 키가 아직 등록되지 않았어요.";
+  if(c==="ollama_down")return "PC의 AI 프로그램(Ollama)이 꺼져 있어요. PC에서 Ollama를 켠 뒤 다시 시도해 주세요.";
+  if(c==="model_missing")return "PC에 AI 모델이 아직 설치되지 않았어요. PC의 '한마디 AI 서버' 창 안내를 따라 모델을 받아 주세요.";
   if(c==="daily_limit")return "오늘 쓸 수 있는 AI 횟수를 다 썼어요. 내일 다시 쓸 수 있어요. 수업과 복습은 계속할 수 있어요.";
   if(c==="rate_limited")return "요청이 너무 많아요. 잠시 뒤 다시 시도해 주세요.";
   if(c==="bad_audio")return "녹음이 너무 짧거나 길어요. 다시 녹음해 주세요.";
@@ -43,7 +45,7 @@ export function logUsage(kind,u){
 export async function health(){
   try{
     const r=await raw("/v1/health",{method:"GET"},10000),j=await r.json();
-    caps={checked:true,ok:true,llm:!!j.llm,speech:!!j.speech,provider:j.provider||"",model:j.model||"",user:j.user||"",daily:j.daily||0,error:""};
+    caps={checked:true,ok:true,llm:!!j.llm,speech:!!j.speech,provider:j.provider||"",model:j.model||"",user:j.user||"",daily:j.daily||0,local:!!j.local,problem:j.problem||"",error:""};
   }catch(e){
     caps={checked:true,ok:false,llm:false,speech:false,provider:"",model:"",error:e.code||"network"};
   }

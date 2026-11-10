@@ -156,3 +156,18 @@ test("daily cap per person is enforced when usage storage is bound, and does not
   assert.equal((await call("b-code")).status,200);
   assert.equal((await call("code")).status,200);
 });
+
+test("local Ollama provider: no thinking, JSON format, zero cost, and clear errors when it is off or the model is missing",async()=>{
+  const env3={APP_TOKEN:"code",LLM_PROVIDER:"ollama",LLM_API_KEY:"local",LLM_MODEL:"qwen3:8b",LLM_BASE_URL:"http://127.0.0.1:11434"};
+  const call=()=>worker.fetch(new Request("https://relay.test/v1/judge",{method:"POST",headers:{"content-type":"application/json","x-app-token":"code"},body:JSON.stringify({target:"a",said:"a",ko:"가"})}),env3);
+  mock(()=>new Response(JSON.stringify({message:{content:'{"ok":true,"natural":true,"fix":"","why_ko":"좋아요."}'},prompt_eval_count:50,eval_count:12}),{status:200}));
+  let r=await call(),j=await r.json();
+  assert.equal(r.status,200);assert.equal(j.ok,true);assert.equal(j.usage.usd,0);
+  assert.equal(calls[0].url,"http://127.0.0.1:11434/api/chat");
+  const sent=JSON.parse(calls[0].init.body);
+  assert.deepEqual([sent.model,sent.think,sent.format,sent.stream],["qwen3:8b",false,"json",false]);
+  mock(()=>{throw new TypeError("fetch failed");});
+  r=await call();assert.equal(r.status,503);assert.equal((await r.json()).error,"ollama_down");
+  mock(()=>new Response(JSON.stringify({error:"model not found"}),{status:404}));
+  r=await call();assert.equal(r.status,503);assert.equal((await r.json()).error,"model_missing");
+});

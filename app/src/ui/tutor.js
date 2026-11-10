@@ -29,6 +29,7 @@ async function talkHome(){
   if(!relayReady()){box.innerHTML=setupHtml("AI 선생님은 아직 연결되지 않았어요");return bindSetup();}
   if(!caps.checked){box.innerHTML='<p class="lead">연결을 확인하는 중…</p>';await health();if(ui.tab!=="talk"||ui.busy||!$("#tk"))return;}
   if(!caps.ok){box.innerHTML=setupHtml("AI 서버에 연결하지 못했어요",errorKo({code:caps.error}));return bindSetup();}
+  if(!caps.llm&&caps.problem){box.innerHTML=setupHtml("PC의 AI가 준비되지 않았어요",errorKo({code:caps.problem}));return bindSetup();}
   if(!caps.llm){box.innerHTML=setupHtml("서버에 AI 키가 아직 없어요","서버 설정에 AI 키(LLM_API_KEY)를 넣으면 바로 쓸 수 있어요.");return bindSetup();}
   const ids=orderOf(P.level),done=ids.filter(id=>P.done[id]),rec=lesson(done[done.length-1]||ids[0]);
   const row=(key,title,sub,em)=>'<li><button type="button" class="row" data-topic="'+key+'">'+(lesson(key)?art(key,"th",em):'<span class="ic">'+I.chat+'</span>')+'<span class="tx"><b>'+esc(title)+'</b><small>'+esc(sub)+'</small></span>'+I.go+'</button></li>';

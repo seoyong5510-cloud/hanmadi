@@ -48,6 +48,21 @@ async function llmOnce(env,system,messages,maxTokens){
   if(!env.LLM_API_KEY)throw new Fail("llm_not_configured",503);
   const provider=(env.LLM_PROVIDER||"anthropic").toLowerCase();
   let r,j,text,usage;
+  if(provider==="ollama"){
+    // Local model on the owner's own computer (no usage fee). Thinking is turned off for speed and
+    // the answer is forced to be JSON, which small models need to stay on format.
+    try{
+      r=await fetch((env.LLM_BASE_URL||"http://127.0.0.1:11434")+"/api/chat",{method:"POST",headers:{"content-type":"application/json"},
+        body:JSON.stringify({model:env.LLM_MODEL,messages:[{role:"system",content:system}].concat(messages),stream:false,think:false,format:"json",
+          keep_alive:env.OLLAMA_KEEP_ALIVE||"30m",options:{temperature:0.3,num_ctx:Number(env.OLLAMA_NUM_CTX)||4096,num_predict:maxTokens}})});
+    }catch(e){throw new Fail("ollama_down",503,"local AI program is not running");}
+    j=await r.json().catch(()=>({}));
+    if(r.status===404)throw new Fail("model_missing",503,"model is not installed: "+env.LLM_MODEL);
+    if(!r.ok)throw new Fail("ai_error",502,j.error||("ollama "+r.status));
+    text=(j.message&&j.message.content)||"";
+    usage={in:j.prompt_eval_count||0,out:j.eval_count||0,usd:0};
+    return {text,usage};
+  }
   if(provider==="anthropic"){
     r=await fetch((env.LLM_BASE_URL||"https://api.anthropic.com")+"/v1/messages",{method:"POST",
       headers:{"content-type":"application/json","x-api-key":env.LLM_API_KEY,"anthropic-version":"2023-06-01"},

@@ -1,6 +1,6 @@
 // Offline support: the app shell and lesson content are cached so lessons open without a network.
 // (Speech recognition and the AI teacher still need a connection.)
-const CACHE="hanmadi-app-v7";
+const CACHE="hanmadi-app-v8";
 const FILES=["./","index.html","styles.css","manifest.webmanifest","icon-192.png","icon-512.png",
  "content/a1.json","content/a2.json","content/a2p.json","content/b1.json","content/b2.json","content/c1.json",
  "src/main.js","src/core/util.js","src/core/levels.js","src/core/grade.js","src/core/store.js","src/core/content.js","src/core/srs.js","src/core/plan.js","src/core/placement.js",
