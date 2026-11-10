@@ -186,8 +186,14 @@ try{
 
   /* 3. a full lesson at A1 with a wrong first try everywhere */
   await page.evaluate(()=>window.__t.show("lessons"));await page.click('[data-lesson="l2"]');
-  ok("lesson opens with its goal and grammar point",(await txt(page,".inst")).includes("이번 수업")&&(await txt(page,".ans")).length>10);
+  ok("lesson opens with the teacher card and today's goal",!!(await page.$("img.tch"))&&(await txt(page,".tbub")).includes("자기소개"));
   await page.screenshot({path:SHOTS+"/05-lesson-intro.png"});
+  await page.click("#nx");await page.waitForFunction(()=>!!document.querySelector(".tpoint"));
+  ok("second teacher card explains the key point and the pattern",(await txt(page,".tcard")).includes("I like")&&(await page.$$(".tbub")).length===2);
+  await page.screenshot({path:SHOTS+"/05a-teacher-point.png"});
+  await page.click("#nx");await page.waitForSelector(".tlist");
+  ok("third teacher card previews the four sentences",(await page.$$(".tlist li")).length===4);
+  await page.screenshot({path:SHOTS+"/05a2-teacher-list.png"});
   await page.click("#nx");await page.waitForSelector("h1.en");
   ok("study screen explains the grammar of the sentence",(await txt(page,".gram")).includes("from")&&(await txt(page,".gram")).includes("전치사"),await txt(page,".gram"));
   await page.screenshot({path:SHOTS+"/05b-grammar.png"});

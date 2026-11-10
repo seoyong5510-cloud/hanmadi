@@ -27,7 +27,8 @@ function startLesson(id){
   const l=lesson(id),q=[],ws=shuffle(l.words).slice(0,2),tts=canSpeak();
   const picQ=wd=>({t:"pic",wd,ans:wd.w,fbA:wd.e+" "+wd.w,fbB:wd.ko,spk:wd.w,
     opts:shuffle([wd.w].concat(shuffle(l.words.filter(x=>x!==wd)).slice(0,2).map(x=>x.w)))});
-  q.push({t:"intro",l});
+  // the teacher explains first, in three picture cards: today's goal, the key point, the sentences
+  q.push({t:"intro",l,s:1});q.push({t:"intro",l,s:2});q.push({t:"intro",l,s:3});
   // Each new sentence: see and repeat, then say it again at once with half the words hidden.
   l.ph.forEach(p=>{q.push({t:"learn",p,en:p.en});q.push({t:"fade",p,en:p.en});});
   ws.forEach(wd=>q.push(picQ(wd)));
@@ -98,9 +99,11 @@ function showEx(){
   S.first=true;S.hint=false;S.fails=0;
   let m="",auto="";
   if(ex.t==="intro"){
-    const l=ex.l;
-    m='<p class="inst">이번 수업</p>'+art(l.id,"hero",l.e)+'<h1 class="koq">'+esc(l.title)+'</h1><p class="lead">'+esc(l.goal)+'</p>'
-     +'<div class="ans"><p class="why" style="margin:0"><b>'+esc(l.grammar.point)+'</b></p><p class="ko">'+esc(l.grammar.note)+'</p></div>';
+    const l=ex.l,T=(n,cls)=>'<img class="tch '+(cls||"")+'" src="img/t'+n+'.webp" alt="선생님" width="540" height="540">';
+    if(ex.s===1)m='<div class="tcard">'+T(1)+'<div class="tbub"><small>선생님</small><p>안녕하세요! 오늘은 <b>'+esc(l.title)+'</b> 수업이에요.</p><p>'+esc(l.goal)+'</p><p class="tsub">'+esc(l.sub)+' 쓰는 말을 배워요. 먼저 핵심부터 짚고 갈게요.</p></div></div>';
+    else if(ex.s===2)m='<div class="tcard">'+T(2)+'<div class="tbub"><small>오늘의 핵심</small><p class="tpoint" lang="en">'+esc(l.grammar.point)+'</p><p>'+esc(l.grammar.note)+'</p></div>'
+      +'<div class="tbub alt"><small>이렇게 바꿔 써요</small><p class="tframe" lang="en">'+frameH(l)+'</p><p class="tsub">'+l.pat.items.map(x=>'<span lang="en">'+esc(x.w)+'</span> '+esc(x.wk)).join(" · ")+'</p></div></div>';
+    else m='<div class="tcard">'+T(3,"sm")+'<div class="tbub"><small>오늘 말할 네 문장</small><ol class="tlist">'+l.ph.map(p=>'<li><b lang="en">'+esc(p.en)+'</b><span>'+esc(p.ko)+'</span></li>').join("")+'</ol><p class="tsub">지금 외우지 않아도 돼요. 여러 번 말하다 보면 입에 붙어요.</p></div></div>';
   }else if(ex.t==="learn"){
     if(M().blind&&canSpeak())m='<p class="inst">먼저 듣고, 들은 대로 말해요</p>'+playB(p.en)+hidden(p,"문장 보기",true);
     else m='<p class="inst">듣고 따라 말해요</p>'+picH(p.e)+'<h1 class="en" lang="en">'+esc(p.en)+'</h1>'+(M().say&&p.say?'<p class="say">'+esc(p.say)+'</p>':"")+'<p class="ko">'+esc(p.ko)+'</p>'+(p.note?'<p class="why">'+esc(p.note)+'</p>':"")+gramH(p.en)+auds(p.en)+tipsHtml(p.en);
@@ -151,7 +154,7 @@ function showEx(){
   else if(ex.t==="spell")dockSpell(ex);
   else if(ex.t==="build")dockBuild(ex);
   else if(ex.t==="frame"||ex.t==="intro"){
-    $("#dock").innerHTML='<button type="button" class="cta" id="nx">'+(ex.t==="intro"?"시작하기":"말해 볼게요")+'</button>';
+    $("#dock").innerHTML='<button type="button" class="cta" id="nx">'+(ex.t==="intro"?(ex.s<3?"다음":"시작하기"):"말해 볼게요")+'</button>';
     $("#nx").addEventListener("click",next);
   }else dockMic(ex);
   fit();

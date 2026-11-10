@@ -352,3 +352,20 @@ details.gram{margin:8px 0 4px;padding:10px 14px}
 /* half-hidden repeat */
 .fadeline{margin-top:18px;font-size:24px;font-weight:700;line-height:1.7}
 .fadeline .gap{display:inline-block;height:1.05em;vertical-align:-0.15em;border-radius:8px;background:var(--fill);box-shadow:inset 0 -3px 0 var(--line)}
+/* teacher explanation cards */
+.tcard{display:grid;gap:14px}
+.tch{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover;object-position:50% 22%;border-radius:28px;background:var(--fill)}
+.tch.sm{aspect-ratio:16/9}
+.tbub{position:relative;padding:16px 18px;border-radius:6px 22px 22px 22px;background:var(--fill);display:grid;gap:8px;font-size:17px;line-height:1.55}
+.tbub small{font-size:12px;font-weight:800;color:var(--brand);letter-spacing:.02em}
+.tbub b{font-weight:800}
+.tbub.alt{background:color-mix(in srgb,var(--brand) 7%,var(--bg));border-radius:22px}
+.tpoint{font-size:21px;font-weight:800;line-height:1.35}
+.tframe{font-size:20px;font-weight:700}
+.tsub{font-size:14px;color:var(--sub)}
+.tlist{margin:0;padding:0;list-style:none;display:grid;gap:10px;counter-reset:n}
+.tlist li{display:grid;gap:1px;padding-left:30px;position:relative;counter-increment:n}
+.tlist li::before{content:counter(n);position:absolute;left:0;top:2px;width:22px;height:22px;border-radius:50%;background:var(--brand);color:var(--on-brand);font-size:12px;font-weight:800;display:grid;place-items:center}
+.tlist b{font-size:17px}
+.tlist span{font-size:14px;color:var(--sub)}
+.tframe u{text-decoration:none;display:inline-block;min-width:54px;border-bottom:4px solid var(--brand)}
