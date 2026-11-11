@@ -133,7 +133,7 @@ async function driveSession(page,mode){
       }
       if(all(".slot").length&&!q("#dock .fb")){
         seen.push("spell");
-        const w=findWord(q(".koq").innerText);if(!w)return {stuck:"word not found "+key,seen};
+        let w=findWord(q(".koq").innerText);{const ko=q(".koq").innerText,n=all(".slot").length;const c=[];for(const l of window.__t.all())for(const x of l.words)if(x.ko===ko)c.push(x.w);w=c.find(x=>x.length===n)||w;}if(!w)return {stuck:"word not found "+key,seen};
         const kin=q("#kin");
         if(kin){if(mode==="badfirst"&&!missed[key]){missed[key]=1;kin.value="zzz";q("#kf").requestSubmit();await sleep(10);}kin.value=w;q("#kf").requestSubmit();continue;}
         for(const ch of w){const t=all("#dock .tile").find(b=>!b.disabled&&b.textContent===ch);if(!t)return {stuck:"tile "+ch+" for "+w,seen};t.click();}
