@@ -404,7 +404,7 @@ function finish(){
   const mins=Math.max(1,Math.round((Date.now()-(S.t0||Date.now()))/60000));
   endClock();save();
   if(S.kind==="ears"){extra='<li><span>한 번에 맞힌 소리</span><b>'+(S.pairOk||0)+' / '+S.q.length+'</b></li>';P.ears=(P.ears||[]).concat([{d:today(),ok:S.pairOk||0,n:S.q.length}]).slice(-30);save();}
-  const title=S.kind==="lesson"?esc(lesson(S.id).title)+" 수업을 마쳤어요":S.kind==="ears"?"발음 구별 듣기를 마쳤어요":"복습을 마쳤어요";
+  const title=S.kind==="lesson"?esc(lesson(S.id).title)+" 수업을 마쳤어요":S.kind==="ears"?"발음 구별 듣기를 마쳤어요":S.kind==="wordquiz"?"단어 퀴즈를 마쳤어요":"복습을 마쳤어요";
   const talk=S.kind==="lesson"&&llmReady()?'<button type="button" class="txt" id="talk">이 주제로 AI 선생님과 대화하기</button>':"";
   const id=S.id;
   app.innerHTML='<div class="fin">'+(S.kind==="lesson"?'<img class="tch fin-t" src="img/t4.webp" alt="선생님" width="432" height="540"><p class="tbub" style="margin-bottom:8px"><small>선생님</small>잘했어요! 오늘 배운 문장은 내일 복습에 다시 나와요.</p>':"")+'<h1>'+title+'</h1><ul class="rows"><li><span>방금 영어로 말한 횟수</span><b>'+S.said+'번</b></li><li><span>걸린 시간</span><b>약 '+mins+'분</b></li><li><span>연속 학습</span><b>'+streak(P)+'일</b></li>'+extra+'</ul>'+note+'</div>';
@@ -427,5 +427,12 @@ function startEars(){
   begin({kind:"ears",q});
 }
 register("ears",startEars);
+// quick word quiz from the vocabulary section: choose the word, then spell it
+register("wordquiz",list=>{
+  const pick=shuffle(list).slice(0,8),q=[];
+  pick.forEach(wd=>q.push({t:"pic",wd,ans:wd.w,fbA:wd.e+" "+wd.w,fbB:wd.ko,spk:wd.w,opts:shuffle([wd.w].concat(shuffle(list.filter(x=>x!==wd)).slice(0,2).map(x=>x.w)))}));
+  shuffle(pick).slice(0,4).forEach(wd=>q.push({t:"spell",wd,hard:M().spell!=="tiles"}));
+  begin({kind:"wordquiz",q});
+});
 register("lesson",startLesson);
 register("review",startReview);

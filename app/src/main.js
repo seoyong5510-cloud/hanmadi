@@ -8,6 +8,7 @@ import {app,chrome,$,ui,show} from "./ui/nav.js";
 import "./ui/home.js";
 import "./ui/session.js";
 import "./ui/tutor.js";
+import "./ui/words.js";
 
 async function boot(){
   load();

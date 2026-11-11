@@ -223,6 +223,22 @@ try{
   ok("ear training: ten sound pairs, then a result",pairs===10&&(await txt(page,".fin")).includes("10 / 10"),pairs+" "+(await txt(page,".fin")).slice(0,80));
   await page.click("#home");
 
+  /* 3c. vocabulary section */
+  await page.click("[data-words]");await page.waitForSelector("#wq");
+  ok("vocabulary lists the lesson words with search",(await page.$$("[data-w]")).length>=100);
+  await page.fill("#wq","family");await page.waitForFunction(()=>document.querySelectorAll("[data-w]").length<10);
+  await page.click('[data-w="family"]');await page.waitForSelector("#star");
+  ok("word card shows the word and its meaning",(await txt(page,".wcard")).includes("family")&&(await txt(page,".wmean")).includes("가족"));
+  await page.screenshot({path:SHOTS+"/60-word-card.png"});
+  await page.click("#star");await page.waitForFunction(()=>document.querySelector("#star").innerText.includes("담음"));
+  ok("word saved to my word book",await page.evaluate(()=>window.__t.P.wb.family===1));
+  await page.click("#back");await page.waitForSelector("#wq");await page.fill("#wq","");
+  await page.screenshot({path:SHOTS+"/61-words.png"});
+  await page.click("#wquiz");
+  r=await driveSession(page,"good");
+  ok("word quiz runs to the end",r.done===true,JSON.stringify(r).slice(0,200));
+  await page.evaluate(()=>window.__t.show("today"));
+
   /* 4. persistence across a restart */
   await page.reload();await page.waitForFunction(()=>window.__t&&document.querySelector(".tabs"));
   ok("progress survives closing and reopening",await page.evaluate(()=>window.__t.P.done.l2===true&&Object.keys(window.__t.P.cards).length===24));
