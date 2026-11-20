@@ -6,7 +6,7 @@ import {gradeBest,gradeFrame,tipsFor} from "../core/grade.js";
 import {grow,addCards,dueKeys,streak} from "../core/srs.js";
 import {today,plusDays,shuffle,esc} from "../core/util.js";
 import {SR,listen,stop as stopSR,abort as abortSR,listening} from "../speech/sr.js";
-import {speak,speakKo,stopSpeak,canSpeak,DEVICE_TTS} from "../speech/tts.js";
+import {speak,speakKo,stopSpeak,canSpeak,DEVICE_TTS,preload} from "../speech/tts.js";
 import {canRecord,startRecording} from "../speech/wav.js";
 import {sfx,confetti} from "../speech/sfx.js";
 import {llmReady,speechReady,call} from "../ai/relay.js";
@@ -188,7 +188,7 @@ function showEx(){
     $("#dock").innerHTML='<button type="button" class="cta" id="nx">수업 시작하기</button>';
     $("#nx").addEventListener("click",()=>{stopSpeak();next();});
     const rb=$("#replay");
-    const run=async()=>{rb.hidden=true;const ok=await playScene(app,ex.l,canSpeak()?t=>speak(t):()=>Promise.resolve(),alive);if(ok&&alive())rb.hidden=false;fit();};
+    const run=async()=>{rb.hidden=true;const ok=await playScene(app,ex.l,canSpeak()?(t,w)=>speak(t,0,w):()=>Promise.resolve(),alive,preload);if(ok&&alive())rb.hidden=false;fit();};
     rb.addEventListener("click",()=>{stopSpeak();run();});
     run();
   }

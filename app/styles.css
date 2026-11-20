@@ -446,12 +446,12 @@ details.gram{margin:8px 0 4px;padding:10px 14px}
 /* arms (rotate around the shoulder) */
 .chr .arm{transform-box:view-box;transform-origin:0 0;transform:rotate(calc(var(--s)*-8deg));transition:transform .45s cubic-bezier(.3,.8,.3,1.15)}
 .chr .ab{transform:rotate(calc(var(--s)*8deg))}
-.chr .item{opacity:0;transform-box:view-box;transform-origin:0 0;transition:opacity .25s}
+.chr .item{transform-box:view-box;transform-origin:0 0;transition:transform .45s cubic-bezier(.3,.8,.3,1.15)}
 .g-wave .af{animation:wave .9s ease-in-out infinite}
 @keyframes wave{0%,100%{transform:rotate(calc(var(--s)*-168deg))}50%{transform:rotate(calc(var(--s)*-138deg))}}
 .g-wave .hd{transform:rotate(calc(var(--s)*4deg))}
 .g-give .af,.g-take .af{transform:rotate(calc(var(--s)*-70deg))}
-.g-give .af .item{opacity:1;transform:rotate(calc(var(--s)*70deg))}
+.g-give .af .item{transform:rotate(calc(var(--s)*70deg))}
 .g-take .af{transform:rotate(calc(var(--s)*-58deg))}
 .g-give .pose{transform:translateX(calc(var(--s)*12px)) rotate(calc(var(--s)*4deg))}
 .g-bow .pose{transform:translateY(10px) scale(.98)}
@@ -497,4 +497,67 @@ details.gram{margin:8px 0 4px;padding:10px 14px}
 .scn-dots li{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.25);transition:background .3s,width .3s}
 .scn-dots li.on{background:#ffd84a}
 .scn-replay{display:flex;align-items:center;gap:6px;margin:14px auto 0;padding:10px 18px;border-radius:999px;background:var(--fill);font-size:15px;font-weight:700}
+
+/* faces */
+.chr .eh,.chr .m3,.chr .m4{opacity:0}
+.chr .ew{transform-box:fill-box;transform-origin:center;transition:transform .25s}
+.f-happy .eyes{opacity:0}.f-happy .eh{opacity:1}
+.f-surp .ew{transform:scale(1.3)}.f-surp:not(.talk) .m3{opacity:1}.f-surp:not(.talk) .m0{opacity:0}
+.f-surp .brow{transform:translateY(-6px)}
+.f-sad .bl{transform:rotate(-14deg) translateY(2px)}.f-sad .br{transform:rotate(14deg) translateY(2px)}
+.chr .bl,.chr .br{transform-origin:center}
+.f-sad:not(.talk) .m4{opacity:1}.f-sad:not(.talk) .m0{opacity:0}
+/* thought bubble */
+.bub .bin{transform-box:fill-box;transform-origin:50% 100%;transform:scale(0);opacity:0;transition:transform .4s cubic-bezier(.2,.9,.3,1.4),opacity .2s}
+.bub.on .bin{transform:scale(1);opacity:1}
+.bub.on .bslot{animation:float 1.6s ease-in-out infinite}
+@keyframes float{50%{transform:translateY(-3px)}}
+/* actions with things in hand */
+.g-show .af{transform:rotate(calc(var(--s)*-122deg))}
+.g-show .af .item{transform:rotate(calc(var(--s)*122deg))}
+.g-show .hd{transform:rotate(calc(var(--s)*5deg))}
+.g-drink .af,.g-eat .af{animation:sip 1.2s ease-in-out infinite}
+.g-drink .af .item,.g-eat .af .item{transform:rotate(calc(var(--s)*-150deg))}
+@keyframes sip{0%,100%{transform:rotate(calc(var(--s)*138deg))}50%{transform:rotate(calc(var(--s)*152deg))}}
+.g-drink .hd,.g-eat .hd{transform:rotate(calc(var(--s)*-5deg))}
+.g-phone .ab{transform:rotate(calc(var(--s)*152deg))}
+.g-phone .ab .item{transform:rotate(calc(var(--s)*-152deg)) translate(0,8px)}
+.g-phone .hd{transform:rotate(calc(var(--s)*6deg))}
+.g-phone .af{animation:expA 1.3s ease-in-out infinite}
+.g-write .ab{transform:rotate(calc(var(--s)*-50deg))}
+.g-write .ab .item{transform:rotate(calc(var(--s)*50deg))}
+.g-write .af{animation:scrib .35s ease-in-out infinite alternate}
+@keyframes scrib{from{transform:rotate(calc(var(--s)*28deg))}to{transform:rotate(calc(var(--s)*40deg))}}
+.g-write .hd{transform:translateY(5px)}
+.g-watch .ab{transform:rotate(calc(var(--s)*-78deg))}
+.g-watch .hd{transform:translateY(6px) rotate(calc(var(--s)*-8deg))}
+.g-watch .af{transform:rotate(calc(var(--s)*-20deg))}
+/* actions with the body */
+.g-worried .af{transform:rotate(calc(var(--s)*158deg))}.g-worried .ab{transform:rotate(calc(var(--s)*-158deg))}
+.g-worried .pose{animation:fidget .4s ease-in-out infinite alternate}
+@keyframes fidget{to{transform:translateX(2px)}}
+.g-sick .af{transform:rotate(calc(var(--s)*168deg))}
+.g-sick .pose{transform:translateY(6px) rotate(calc(var(--s)*-3deg))}
+.g-sick .hd{transform:rotate(calc(var(--s)*-8deg))}
+.g-sleepy .af{transform:rotate(calc(var(--s)*150deg))}
+.g-sleepy .ew{transform:scaleY(.35)}
+.g-sleepy .pose{animation:sway 2s ease-in-out infinite}
+@keyframes sway{50%{transform:rotate(calc(var(--s)*-4deg)) translateY(4px)}}
+.g-laugh .hd{animation:laugh .25s ease-in-out infinite alternate}
+@keyframes laugh{to{transform:translateY(-4px) rotate(calc(var(--s)*-4deg))}}
+.g-laugh .af{transform:rotate(calc(var(--s)*40deg))}.g-laugh .ab{transform:rotate(calc(var(--s)*-40deg))}
+.g-laugh .eyes{opacity:0}.g-laugh .eh{opacity:1}
+.g-surprise .af{transform:rotate(calc(var(--s)*-60deg))}.g-surprise .ab{transform:rotate(calc(var(--s)*60deg))}
+.g-surprise .pose{animation:jump .35s ease-out 1}
+@keyframes jump{50%{transform:translateY(-10px)}}
+.g-surprise .ew{transform:scale(1.3)}
+.g-shrug .af{transform:rotate(calc(var(--s)*-55deg))}.g-shrug .ab{transform:rotate(calc(var(--s)*55deg))}
+.g-shrug .hd{transform:rotate(calc(var(--s)*-9deg))}.g-shrug .brow{transform:translateY(-5px)}
+.g-shrug .pose{transform:translateY(-3px)}
+.g-clap .af{animation:clapA .22s ease-in-out infinite alternate}.g-clap .ab{animation:clapB .22s ease-in-out infinite alternate}
+@keyframes clapA{from{transform:rotate(calc(var(--s)*52deg))}to{transform:rotate(calc(var(--s)*72deg))}}
+@keyframes clapB{from{transform:rotate(calc(var(--s)*-52deg))}to{transform:rotate(calc(var(--s)*-72deg))}}
+.g-clap .eyes{opacity:0}.g-clap .eh{opacity:1}
+.g-shake .af{animation:shk .3s ease-in-out infinite alternate}
+@keyframes shk{from{transform:rotate(calc(var(--s)*-66deg))}to{transform:rotate(calc(var(--s)*-78deg))}}
 @media (prefers-reduced-motion:reduce){.cam,.chr *,.cloud,.plane,.steam path{animation:none !important;transition:none !important}}

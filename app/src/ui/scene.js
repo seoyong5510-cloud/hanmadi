@@ -2,6 +2,7 @@
 // so the learner first sees WHEN the new sentences are used. Everything is drawn in SVG here
 // (original characters and places), so every lesson gets a scene without extra image files.
 import {esc} from "../core/util.js";
+import {PROPS,planLine} from "./props.js";
 
 const OL="#3b2a21"; // outline colour used for every shape (thick cartoon outline)
 const sw=w=>' stroke="'+OL+'" stroke-width="'+(w||4)+'" stroke-linejoin="round" stroke-linecap="round"';
@@ -61,43 +62,30 @@ export function charSvg(ch){
     ?'<ellipse cx="80" cy="114" rx="20" ry="14" fill="'+c.inner+'"'+sw(3)+'/><ellipse cx="73" cy="114" rx="3.5" ry="5" fill="'+OL+'"/><ellipse cx="87" cy="114" rx="3.5" ry="5" fill="'+OL+'"/>'
     :'<ellipse cx="80" cy="116" rx="'+(sp==="rabbit"||sp==="cat"?16:24)+'" ry="'+(sp==="rabbit"||sp==="cat"?12:17)+'" fill="'+c.light+'"/><path d="M73 107 Q80 103 87 107 Q84 114 80 115 Q76 114 73 107 Z" fill="'+OL+'"/>';
   const eyeC=sp==="panda"?"#fff":OL;
-  const eyes='<g class="eyes"><ellipse cx="'+(60+px)+'" cy="92" rx="6.5" ry="8.5" fill="'+(sp==="panda"?"#2c2a2b":OL)+'"/><ellipse cx="'+(100+px)+'" cy="92" rx="6.5" ry="8.5" fill="'+(sp==="panda"?"#2c2a2b":OL)+'"/><circle cx="'+(62+px)+'" cy="89" r="2.6" fill="#fff"/><circle cx="'+(102+px)+'" cy="89" r="2.6" fill="#fff"/>'
-    +(sp==="panda"?'<circle cx="'+(60+px)+'" cy="92" r="5" fill="none" stroke="'+eyeC+'" stroke-width="1.5" opacity=".5"/><circle cx="'+(100+px)+'" cy="92" r="5" fill="none" stroke="'+eyeC+'" stroke-width="1.5" opacity=".5"/>':"")+'</g>';
+  const eyes='<g class="ew"><g class="eyes"><ellipse cx="'+(60+px)+'" cy="92" rx="6.5" ry="8.5" fill="'+(sp==="panda"?"#2c2a2b":OL)+'"/><ellipse cx="'+(100+px)+'" cy="92" rx="6.5" ry="8.5" fill="'+(sp==="panda"?"#2c2a2b":OL)+'"/><circle cx="'+(62+px)+'" cy="89" r="2.6" fill="#fff"/><circle cx="'+(102+px)+'" cy="89" r="2.6" fill="#fff"/>'
+    +(sp==="panda"?'<circle cx="'+(60+px)+'" cy="92" r="5" fill="none" stroke="'+eyeC+'" stroke-width="1.5" opacity=".5"/><circle cx="'+(100+px)+'" cy="92" r="5" fill="none" stroke="'+eyeC+'" stroke-width="1.5" opacity=".5"/>':"")+'</g></g>'
+    +'<g class="eh"><path d="M'+(52+px)+' 94 Q'+(60+px)+' 82 '+(68+px)+' 94" fill="none"'+sw(4)+'/><path d="M'+(92+px)+' 94 Q'+(100+px)+' 82 '+(108+px)+' 94" fill="none"'+sw(4)+'/></g>';
   const brows=ch.glasses?'<g fill="none" stroke="'+OL+'" stroke-width="3"><circle cx="'+(60+px)+'" cy="92" r="14"/><circle cx="'+(100+px)+'" cy="92" r="14"/><path d="M'+(74+px)+' 92 L'+(86+px)+' 92"/></g>':"";
   const my=sp==="pig"?128:126;
   const mouth='<path class="m0" d="M70 '+my+' Q80 '+(my+9)+' 90 '+my+'" fill="none"'+sw(3.5)+'/>'
     +'<g class="m1"><path d="M68 '+(my-2)+' Q80 '+(my-1)+' 92 '+(my-2)+' Q90 '+(my+16)+' 80 '+(my+16)+' Q70 '+(my+16)+' 68 '+(my-2)+' Z" fill="#8e2f2f"'+sw(3)+'/><path d="M73 '+(my+10)+' Q80 '+(my+5)+' 87 '+(my+10)+' Q84 '+(my+15)+' 80 '+(my+15)+' Q76 '+(my+15)+' 73 '+(my+10)+' Z" fill="#f2828a"/></g>';
   const cheeks='<ellipse cx="44" cy="114" rx="9" ry="6" fill="#ff8f8f" opacity=".45"/><ellipse cx="116" cy="114" rx="9" ry="6" fill="#ff8f8f" opacity=".45"/>';
-  const browL='<path class="brow" d="M'+(50+px)+' 74 Q'+(60+px)+' 68 '+(70+px)+' 74" fill="none"'+sw(3.5)+'/><path class="brow" d="M'+(90+px)+' 74 Q'+(100+px)+' 68 '+(110+px)+' 74" fill="none"'+sw(3.5)+'/>';
+  const browL='<path class="brow bl" d="M'+(50+px)+' 74 Q'+(60+px)+' 68 '+(70+px)+' 74" fill="none"'+sw(3.5)+'/><path class="brow br" d="M'+(90+px)+' 74 Q'+(100+px)+' 68 '+(110+px)+' 74" fill="none"'+sw(3.5)+'/>';
+  const extra='<ellipse class="m3" cx="80" cy="'+(my+5)+'" rx="7" ry="9" fill="#8e2f2f"'+sw(3)+'/><path class="m4" d="M71 '+(my+7)+' Q80 '+(my-1)+' 89 '+(my+7)+'" fill="none"'+sw(3.5)+'/>';
   const half='<ellipse class="m2" cx="80" cy="'+(my+4)+'" rx="8" ry="5.5" fill="#8e2f2f"'+sw(3)+'/>';
   const phone=ch.phone?'<g><rect x="'+(look>0?126:6)+'" y="80" width="22" height="40" rx="5" fill="#2f3137"'+sw(3)+'/><circle cx="'+(look>0?137:17)+'" cy="124" r="13" fill="'+c.fur+'"'+sw(3)+'/></g>':"";
   // arms hang from the shoulders; "af" is the arm on the side the character faces (toward the partner)
   const sleeve={bowtie:"#2f3137",vest:"#ffffff",coat:"#ffffff"}[ch.o]||ch.col||"#4a6fa5";
   const arm=(x,cls)=>'<g transform="translate('+x+' 170)"><g class="arm '+cls+'"><path d="M-12 0 L-11 50 Q0 58 11 50 L12 0 Q0 -8 -12 0 Z" fill="'+sleeve+'"'+sw(3.5)+'/>'
-    +(cls==="af"&&ch.item?'<g transform="translate(0 60) scale(1.5)"><g class="item">'+ch.item+'</g></g>':"")
+    +'<g transform="translate(0 60) scale(1.45)"><g class="item"></g></g>'
     +'<circle cx="0" cy="60" r="11" fill="'+c.fur+'"'+sw(3.5)+'/></g></g>';
   const arms=ch.phone?"":arm(look>=0?124:36,"af")+arm(look>=0?36:124,"ab");
   return '<g class="body"><g class="pose"><g class="breath">'+outfit(ch.o,ch.col||"#4a6fa5")
-    +'<g class="hd"><g class="head">'+head+face+muz+cheeks+eyes+browL+brows+mouth+half+hat(ch.hat,ch.hcol||ch.col||"#d6453d")+phone+'</g></g>'+arms+'</g></g></g>';
+    +'<g class="hd"><g class="head">'+head+face+muz+cheeks+eyes+browL+brows+mouth+half+extra+hat(ch.hat,ch.hcol||ch.col||"#d6453d")+phone+'</g></g>'+arms+'</g></g></g>';
 }
-// The thing a character hands over, by place (drawn around the paw).
-const ITEMS={
-  cafe:'<path d="M-10 -26 L10 -26 L8 0 L-8 0 Z" fill="#fff"'+sw(3)+'/><rect x="-11" y="-30" width="22" height="6" rx="2" fill="#7a4a2e"'+sw(2)+'/><rect x="-9" y="-17" width="18" height="7" fill="#3fae6e"/>',
-  restaurant:'<rect x="-14" y="-34" width="28" height="36" rx="3" fill="#7a2e3a"'+sw(3)+'/><path d="M-7 -24 H7 M-7 -16 H5" stroke="#f2c94c" stroke-width="2.5"/>',
-  shop:'<path d="M-14 -24 H14 L12 4 H-12 Z" fill="#f2a65a"'+sw(3)+'/><path d="M-6 -24 Q0 -36 6 -24" fill="none"'+sw(3)+'/>',
-  hotel:'<rect x="-14" y="-22" width="28" height="18" rx="3" fill="#f2c94c"'+sw(3)+'/><rect x="-10" y="-17" width="10" height="4" fill="#3b2a21"/>',
-  airport:'<rect x="-11" y="-30" width="22" height="30" rx="3" fill="#2f5aa8"'+sw(3)+'/><circle cx="0" cy="-18" r="5" fill="none" stroke="#f2c94c" stroke-width="2"/>',
-  station:'<rect x="-16" y="-20" width="32" height="18" rx="2" fill="#fff"'+sw(3)+'/><path d="M-10 -14 H8 M-10 -8 H2" stroke="#d6453d" stroke-width="2.5"/>',
-  clinic:'<rect x="-13" y="-24" width="26" height="22" rx="3" fill="#fff"'+sw(3)+'/><path d="M0 -20 V-6 M-7 -13 H7" stroke="#3fae6e" stroke-width="4"/>',
-  bank:'<rect x="-16" y="-22" width="32" height="18" rx="2" fill="#a8d5a2"'+sw(3)+'/><circle cx="0" cy="-13" r="4" fill="none" stroke="#3b6b3a" stroke-width="2"/>',
-  office:'<rect x="-12" y="-32" width="24" height="32" rx="2" fill="#fff"'+sw(3)+'/><path d="M-6 -24 H6 M-6 -17 H6 M-6 -10 H2" stroke="#9fb4d6" stroke-width="2.5"/>',
-  meeting:'<rect x="-12" y="-32" width="24" height="32" rx="2" fill="#fff"'+sw(3)+'/><path d="M-6 -12 L-2 -18 L2 -14 L7 -24" fill="none" stroke="#2f6bff" stroke-width="2.5"/>',
-  home:'<rect x="-12" y="-28" width="24" height="26" rx="3" fill="#f7b9c4"'+sw(3)+'/><circle cx="0" cy="-15" r="6" fill="#fff"/>',
-  street:'<rect x="-15" y="-26" width="30" height="24" rx="2" fill="#fdf3d6"'+sw(3)+'/><path d="M-10 -8 L-2 -18 L4 -12 L10 -20" fill="none" stroke="#d6453d" stroke-width="2.5"/>',
-  park:'<rect x="-9" y="-30" width="18" height="30" rx="4" fill="#2f3137"'+sw(3)+'/><rect x="-6" y="-26" width="12" height="20" fill="#9fd6f2"/>',
-  taxi:'<rect x="-15" y="-20" width="30" height="18" rx="3" fill="#5b8cff"'+sw(3)+'/><rect x="-11" y="-16" width="8" height="5" fill="#f2c94c"/>'
-};
-
+// What gets handed over when a line offers something but names no item.
+const PLACE_PROP={cafe:"cup",restaurant:"menu",shop:"bag",hotel:"keycard",airport:"passport",station:"ticket",clinic:"medicine",
+  bank:"cash",office:"doc",meeting:"chart",home:"photo",street:"map",park:"phone",taxi:"card"};
 /* ---------- which gesture fits a line ---------- */
 export function gestureFor(en,i){
   const t=en.trim(),q=/\?\s*$/.test(t);
@@ -179,6 +167,25 @@ const CAST={
 };
 const SERVICE=/hotel|airport|station|clinic|bank|cafe|restaurant|shop|taxi/;
 export const ME={sp:"bear",o:"hoodie",col:"#2f6bff"};
+// Natural voices (recorded in advance into app/audio): the learner is always the same voice,
+// the partner's voice follows their name, or is picked per lesson.
+export const ME_VOICE="en-US-AndrewNeural";
+const FEMALE=/^(Anna|Maria|Jenny|Sarah|Emma|Lisa|Kate|Amy|Mia|Sophie|Sophia|Emily|Grace|Julia|Rachel|Hannah|Olivia|Lucy|Linda|Susan|Karen|Jessica|Laura|Nina|Sara|Ellen|Amanda|Claire|Jane|Mary|Helen|Yuna|Jisoo|Sujin|Minji)$/;
+const MALE=/^(Tom|Dan|Daniel|Marcus|Mike|Michael|John|James|David|Chris|Ben|Sam|Jack|Mark|Paul|Peter|Kevin|Brian|Ryan|Alex|Eric|Steve|Jason|Minsu|Jun|Hyun|Leo|Max|Nick|Tony|Ken|Joe|Matt)$/;
+const FEM_V=["en-US-AvaNeural","en-US-EmmaNeural","en-US-JennyNeural","en-US-AriaNeural","en-GB-SoniaNeural","en-US-MichelleNeural"];
+const MALE_V=["en-US-BrianNeural","en-US-ChristopherNeural","en-US-EricNeural","en-US-GuyNeural","en-GB-RyanNeural","en-US-RogerNeural"];
+export function voiceOf(l){
+  const sc=sceneFor(l),h=hashOf(l.id+"v"),n=sc.label;
+  if(FEMALE.test(n))return FEM_V[h%FEM_V.length];
+  if(MALE.test(n))return MALE_V[h%MALE_V.length];
+  return h%2?FEM_V[(h>>2)%FEM_V.length]:MALE_V[(h>>2)%MALE_V.length];
+}
+// File name of a recorded line: a short hash of voice + text.
+export function audioKey(voice,text){
+  let h=2166136261;const s=voice+"|"+text;
+  for(let i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)>>>0;}
+  return h.toString(36);
+}
 const LBL=[[/interviewer|hiring manager/i,"면접관"],[/team member|junior|new hire/i,"팀원"],[/\bclients?\b|vendor|supplier|partner company/i,"거래처"],
   [/customer (support|service)|support agent|representative|operator/i,"상담원"],[/real estate|realtor/i,"중개인"],[/building manager|landlord/i,"관리인"],
   [/pharmacist/i,"약사"],[/doctor/i,"의사"],[/receptionist/i,"직원"],[/driver/i,"기사님"],[/\bfriends?\b/i,"친구"],[/neighbou?r/i,"이웃"],
@@ -186,7 +193,7 @@ const LBL=[[/interviewer|hiring manager/i,"면접관"],[/team member|junior|new 
 const BOSS=/director|executive|vice president|head of|boss|team lead|your manager|department head/i;
 const hashOf=id=>[...id].reduce((a,ch)=>(a*31+ch.charCodeAt(0))>>>0,7);
 export function sceneFor(l){
-  const role=l.role||"",where=l.title+" "+l.sub,txt=[where,l.topicKo,role].join(" "),h=hashOf(l.id);
+  const role=(l.role||"").split(/\.\s/)[0],where=l.title+" "+l.sub,txt=[where,l.topicKo,role].join(" "),h=hashOf(l.id);
   const phone=/전화|통화|phone|call(?:ing|ed|s)?\b/i.test(where+" "+(l.topicKo||""));
   let place=(RULES.find(r=>r[1].test(where))||RULES.find(r=>r[1].test(txt)))[0];
   if(place==="park"&&/^[eftu]/.test(l.id))place="office";           // business levels default to the office
@@ -214,18 +221,22 @@ export function sceneFor(l){
 }
 
 /* ---------- the stage ---------- */
+// A thought bubble above a character's head; the thing they talk about appears inside it.
+const bubble=(who,x,y)=>'<g class="bub b-'+who+'" transform="translate('+x+' '+y+')"><g class="bin"><circle cx="0" cy="34" r="30" fill="#fff"'+sw(3)+'/>'
+  +'<circle cx="'+(who==="them"?-30:30)+'" cy="66" r="6" fill="#fff"'+sw(2.5)+'/><circle cx="'+(who==="them"?-40:40)+'" cy="78" r="3.5" fill="#fff"'+sw(2)+'/>'
+  +'<g transform="translate(0 50) scale(1.15)"><g class="bslot"></g></g></g></g>';
 function stage(sc){
   const P=PLACES[sc.place]||PLACES.park;
-  const it=ITEMS[sc.place]||ITEMS.park,them=Object.assign({look:1,phone:sc.phone,item:it},sc.them),me=Object.assign({look:-1,phone:sc.phone,item:it},ME);
+  const them=Object.assign({look:1,phone:sc.phone},sc.them),me=Object.assign({look:-1,phone:sc.phone},ME);
   if(sc.phone){
-    const half=(pl,ch,side,x)=>{const Q=PLACES[pl];return '<svg viewBox="100 0 200 300" class="half" preserveAspectRatio="xMidYMid slice"><rect width="400" height="300" fill="'+Q.wall+'"/>'+Q.back()+'<rect y="214" width="400" height="90" fill="'+Q.floor+'"/><g class="chr c-'+side+'" style="--s:'+(side==="them"?1:-1)+'" transform="translate('+x+' 70) scale(1.0)">'+charSvg(ch)+'</g>'+Q.front()+'</svg>';};
+    const half=(pl,ch,side,x)=>{const Q=PLACES[pl];return '<svg viewBox="100 0 200 300" class="half" preserveAspectRatio="xMidYMid slice"><rect width="400" height="300" fill="'+Q.wall+'"/>'+Q.back()+'<rect y="214" width="400" height="90" fill="'+Q.floor+'"/><g class="chr c-'+side+'" style="--s:'+(side==="them"?1:-1)+'" transform="translate('+x+' 70) scale(1.0)">'+charSvg(ch)+'</g>'+Q.front()+bubble(side,side==="them"?240:160,40)+'</svg>';};
     return '<div class="stage phone">'+half(sc.place==="park"||sc.place==="street"?"home":sc.place,them,"them",120)+'<span class="ring" aria-hidden="true">📞</span>'+half("home",me,"me",120)+'</div>';
   }
   return '<div class="stage"><svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice"><g class="cam">'
     +'<rect width="400" height="300" fill="'+P.wall+'"/>'+P.back()+'<rect y="214" width="400" height="90" fill="'+P.floor+'"/>'
     +'<g class="chr c-them" style="--s:1" transform="translate(24 24)">'+charSvg(them)+'</g>'
     +'<g class="chr c-me" style="--s:-1" transform="translate(216 24)">'+charSvg(me)+'</g>'
-    +'<g transform="translate(0 22)">'+P.front()+'</g></g></svg></div>';
+    +'<g transform="translate(0 22)">'+P.front()+'</g>'+bubble("them",186,40)+bubble("me",214,40)+'</g></svg></div>';
 }
 export function sceneHtml(l){
   const sc=sceneFor(l);
@@ -245,9 +256,25 @@ export function sceneLines(l){
   });
   return out;
 }
+// Puts one line on stage: subtitle-independent pose, face, item in hand or thought bubble. Returns the action.
+export function setLine(root,x,i){
+  const scn=root.querySelector(".scn"),chr=w=>root.querySelectorAll(".chr.c-"+w);
+  const pl=planLine(x.en,gestureFor(x.en,i)),g=pl.act,other=x.who==="me"?"them":"me";
+  root.querySelectorAll(".chr").forEach(c=>{c.className.baseVal=c.className.baseVal.split(" ").filter(k=>!/^(g|f)-/.test(k)).join(" ");c.querySelectorAll(".item").forEach(e=>e.innerHTML="");});
+  root.querySelectorAll(".bub").forEach(b=>b.classList.remove("on"));
+  const item=pl.hand?(pl.prop||PLACE_PROP[scn.dataset.place]||""):g==="give"?PLACE_PROP[scn.dataset.place]||"":"";
+  chr(x.who).forEach(c=>{
+    c.classList.add("talk","g-"+g);if(pl.face)c.classList.add("f-"+pl.face);
+    const slot=c.querySelector((g==="phone"?".ab":".af")+" .item");if(slot&&item)slot.innerHTML=PROPS[item]||"";
+  });
+  if(pl.prop&&!pl.hand){const b=root.querySelector(".b-"+x.who+" .bslot");if(b){b.innerHTML=PROPS[pl.prop]||"";b.closest(".bub").classList.add("on");}}
+  chr(other).forEach(c=>{c.classList.add(g==="give"||g==="shake"?"g-take":"nod");if(pl.face==="happy")c.classList.add("f-happy");});
+  return g;
+}
 // Plays the scene inside `root`. `speak(text)` resolves when the line has been said.
 // `alive()` returns false once the screen is gone, which stops the loop.
-export async function playScene(root,l,speak,alive){
+export async function playScene(root,l,speak,alive,preload){
+  preload=preload||(()=>{});
   const lines=sceneLines(l),wait=ms=>new Promise(r=>setTimeout(r,ms));
   const en=root.querySelector(".scn-en"),ko=root.querySelector(".scn-ko"),key=root.querySelector(".scn-key"),dots=root.querySelector(".scn-dots");
   const scn=root.querySelector(".scn"),chr=w=>root.querySelectorAll(".chr.c-"+w);
@@ -262,16 +289,14 @@ export async function playScene(root,l,speak,alive){
     dots.children[i].className="on";
     en.textContent=x.en;ko.textContent=x.ko;key.hidden=!x.key;
     en.classList.remove("pop");void en.offsetWidth;en.classList.add("pop");
-    const g=gestureFor(x.en,i),G=["wave","give","bow","no","yes","point","think","cheer","tilt","ask","open","explain","take"].map(k=>"g-"+k);
-    root.querySelectorAll(".chr").forEach(c=>c.classList.remove(...G));
-    chr(x.who).forEach(c=>c.classList.add("talk","g-"+g));
-    chr(x.who==="me"?"them":"me").forEach(c=>c.classList.add(g==="give"?"g-take":"nod"));
+    const g=setLine(root,x,i);
     const t0=Date.now();
-    await speak(x.en);
+    if(lines[i+1])preload(lines[i+1].en,lines[i+1].who);
+    await speak(x.en,x.who);
     const min=900+x.en.length*45;           // silent devices: still give time to read
     if(Date.now()-t0<min)await wait(min-(Date.now()-t0));
     root.querySelectorAll(".chr").forEach(c=>c.classList.remove("talk","nod"));
-    setTimeout(()=>root.querySelectorAll(".chr").forEach(c=>c.classList.remove("g-"+g,"g-take")),x.key?900:450);
+    setTimeout(()=>{root.querySelectorAll(".chr").forEach(c=>c.classList.remove("g-"+g,"g-take"));root.querySelectorAll(".bub").forEach(b=>b.classList.remove("on"));},x.key?900:450);
     await wait(x.key?1100:650);
   }
   if(!alive())return false;

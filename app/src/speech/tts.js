@@ -14,11 +14,44 @@ export function stopSpeak(){
   if(DEVICE_TTS){try{speechSynthesis.cancel();}catch(e){}}
 }
 const levelRate=()=>(LV[P.level]||LV.a1).mode.rate;
+// Natural voices recorded in advance (app/audio). The index lists [file, learner-voice?, text].
+let REC=null;
+const recReady=fetch("audio-index.json").then(r=>r.ok?r.json():[]).then(rows=>{
+  REC=new Map();
+  rows.forEach(([k,me,t])=>{const e=REC.get(t)||{};e[me?"me":"them"]=k;REC.set(t,e);});
+}).catch(()=>{REC=new Map();});
+function recFor(text,who){
+  const e=REC&&REC.get(text);if(!e)return "";
+  return who==="them"?(e.them||e.me):(e.me||e.them);
+}
+// Warm the next line so there is no gap between speakers.
+export function preload(text,who){
+  recReady.then(()=>{const k=recFor(text,who);if(k)fetch("audio/"+k+".mp3").catch(()=>{});});
+}
+function playFile(url,mine,speed){
+  return new Promise(res=>{
+    const a=new Audio(url);audio=a;
+    if(speed&&speed!==1){a.playbackRate=speed;a.preservesPitch=true;}
+    let ok=false;
+    a.onplaying=()=>{ok=true;};
+    const done=()=>{if(audio===a)audio=null;res(ok);};
+    a.onended=done;a.onpause=done;a.onerror=()=>{if(audio===a)audio=null;res(false);};
+    a.play().catch(()=>res(false));
+  });
+}
 // Resolves when speaking ends (or could not start).
-export async function speak(text,rate){
+export async function speak(text,rate,who){
   if(!text)return;
   stopSpeak();
   const mine=token,r=rate||levelRate();
+  // 1) the recorded natural voice (already at a learner-friendly speed; "slow" plays it slower)
+  if(!REC)await Promise.race([recReady,new Promise(x=>setTimeout(x,1500))]);
+  if(mine!==token)return;
+  const k=recFor(text,who);
+  if(k){
+    const played=await playFile("audio/"+k+".mp3",mine,rate&&rate<0.8?0.75:1);
+    if(played||mine!==token)return;
+  }
   if(speechReady()){
     try{
       const key=r.toFixed(2)+"|"+text;
