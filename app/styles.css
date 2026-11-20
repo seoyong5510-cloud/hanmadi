@@ -415,24 +415,70 @@ details.gram{margin:8px 0 4px;padding:10px 14px}
 .cam{transition:transform .9s cubic-bezier(.3,.7,.3,1)}
 .f-them .cam{transform:translate(-15.6px,-34.5px) scale(1.15)}
 .f-me .cam{transform:translate(-44.4px,-34.5px) scale(1.15)}
-.chr .body,.chr .head,.chr .eyes,.chr .m1{transform-box:fill-box}
-.live .chr.c-them .body{animation:inL .9s cubic-bezier(.2,.9,.3,1.2) both}
-.live .chr.c-me .body{animation:inR .9s cubic-bezier(.2,.9,.3,1.2) .15s both}
-@keyframes inL{from{transform:translateX(-240px)}to{transform:none}}
-@keyframes inR{from{transform:translateX(240px)}to{transform:none}}
-.chr .head{transform-origin:50% 90%}
-.chr .eyes{transform-origin:center;animation:blink 4.2s infinite}
+.live .chr.c-them .body{animation:inL 1.1s ease-out both}
+.live .chr.c-me .body{animation:inR 1.1s ease-out .2s both}
+@keyframes inL{0%{transform:translate(-240px,0)}20%{transform:translate(-190px,-12px)}40%{transform:translate(-130px,0)}60%{transform:translate(-75px,-12px)}80%{transform:translate(-20px,0)}100%{transform:none}}
+@keyframes inR{0%{transform:translate(240px,0)}20%{transform:translate(190px,-12px)}40%{transform:translate(130px,0)}60%{transform:translate(75px,-12px)}80%{transform:translate(20px,0)}100%{transform:none}}
+/* idle: breathing, weight shift, blinking */
+.chr .breath{transform-box:fill-box;transform-origin:50% 100%;animation:breathe 3.2s ease-in-out infinite}
+.chr.c-me .breath{animation-delay:-1.4s}
+@keyframes breathe{50%{transform:scale(1.012,1.022)}}
+.chr .pose{transform-box:fill-box;transform-origin:50% 100%;transition:transform .5s cubic-bezier(.3,.8,.3,1)}
+.chr.talk .pose{transform:translateX(calc(var(--s)*7px)) rotate(calc(var(--s)*2.5deg))}
+.chr .hd{transform-box:fill-box;transform-origin:50% 92%;transition:transform .45s cubic-bezier(.3,.8,.3,1.2)}
+.chr .head{transform-box:fill-box;transform-origin:50% 92%}
+.chr .eyes{transform-box:fill-box;transform-origin:center;animation:blink 4.2s infinite}
 .chr.c-me .eyes{animation-delay:1.7s}
 @keyframes blink{0%,94%,100%{transform:scaleY(1)}96%{transform:scaleY(.1)}}
-.chr .m1{opacity:0}
-.chr.talk .m1{animation:mo .34s steps(1) infinite}
-.chr.talk .m0{animation:mc .34s steps(1) infinite}
-@keyframes mo{0%{opacity:1}50%{opacity:0}}
-@keyframes mc{0%{opacity:0}50%{opacity:1}}
-.chr.talk .head{animation:bob .68s ease-in-out infinite}
-@keyframes bob{0%,100%{transform:rotate(0) translateY(0)}25%{transform:rotate(-3deg) translateY(-3px)}75%{transform:rotate(3deg) translateY(-2px)}}
-.chr.nod .head{animation:nod 1.6s ease-in-out 1}
-@keyframes nod{30%{transform:rotate(0) translateY(5px)}60%{transform:translateY(0)}}
+.chr .brow{transform-box:fill-box;transition:transform .3s}
+/* lip sync: open, half, closed in an uneven rhythm */
+.chr .m1,.chr .m2{opacity:0}
+.chr.talk .m1{animation:mo .62s step-end infinite}
+.chr.talk .m2{animation:mh .62s step-end infinite}
+.chr.talk .m0{animation:mc .62s step-end infinite}
+@keyframes mo{0%{opacity:1}18%{opacity:0}55%{opacity:1}72%{opacity:0}}
+@keyframes mh{0%{opacity:0}18%{opacity:1}38%{opacity:0}72%{opacity:1}88%{opacity:0}}
+@keyframes mc{0%{opacity:0}38%{opacity:1}55%{opacity:0}88%{opacity:1}}
+.chr.talk .head{animation:bob .9s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:rotate(0) translateY(0)}30%{transform:rotate(-2.5deg) translateY(-3px)}70%{transform:rotate(2.5deg) translateY(-1px)}}
+.chr.nod .hd{animation:nod 1.4s ease-in-out .3s 1}
+@keyframes nod{25%{transform:translateY(6px) rotate(calc(var(--s)*2deg))}50%{transform:none}75%{transform:translateY(4px)}}
+/* arms (rotate around the shoulder) */
+.chr .arm{transform-box:view-box;transform-origin:0 0;transform:rotate(calc(var(--s)*-8deg));transition:transform .45s cubic-bezier(.3,.8,.3,1.15)}
+.chr .ab{transform:rotate(calc(var(--s)*8deg))}
+.chr .item{opacity:0;transform-box:view-box;transform-origin:0 0;transition:opacity .25s}
+.g-wave .af{animation:wave .9s ease-in-out infinite}
+@keyframes wave{0%,100%{transform:rotate(calc(var(--s)*-168deg))}50%{transform:rotate(calc(var(--s)*-138deg))}}
+.g-wave .hd{transform:rotate(calc(var(--s)*4deg))}
+.g-give .af,.g-take .af{transform:rotate(calc(var(--s)*-70deg))}
+.g-give .af .item{opacity:1;transform:rotate(calc(var(--s)*70deg))}
+.g-take .af{transform:rotate(calc(var(--s)*-58deg))}
+.g-give .pose{transform:translateX(calc(var(--s)*12px)) rotate(calc(var(--s)*4deg))}
+.g-bow .pose{transform:translateY(10px) scale(.98)}
+.g-bow .hd{transform:translateY(12px) rotate(calc(var(--s)*3deg))}
+.g-bow .af{transform:rotate(calc(var(--s)*22deg))}.g-bow .ab{transform:rotate(calc(var(--s)*-22deg))}
+.g-yes .hd{animation:yes .55s ease-in-out 3}
+@keyframes yes{50%{transform:translateY(7px)}}
+.g-yes .af{transform:rotate(calc(var(--s)*-100deg))}
+.g-no .hd{animation:no .5s ease-in-out 3}
+@keyframes no{25%{transform:rotate(-7deg)}75%{transform:rotate(7deg)}}
+.g-no .af{transform:rotate(calc(var(--s)*-42deg))}.g-no .ab{transform:rotate(calc(var(--s)*42deg))}
+.g-point .af{transform:rotate(calc(var(--s)*-84deg))}
+.g-point .hd{transform:rotate(calc(var(--s)*6deg))}
+.g-think .af{transform:rotate(calc(var(--s)*152deg))}
+.g-think .hd{transform:rotate(calc(var(--s)*-7deg))}
+.g-think .brow{transform:translateY(-3px)}
+.g-cheer .af{animation:cheerA .5s ease-in-out infinite alternate}.g-cheer .ab{animation:cheerB .5s ease-in-out infinite alternate}
+@keyframes cheerA{from{transform:rotate(calc(var(--s)*-120deg))}to{transform:rotate(calc(var(--s)*-150deg))}}
+@keyframes cheerB{from{transform:rotate(calc(var(--s)*120deg))}to{transform:rotate(calc(var(--s)*150deg))}}
+.g-tilt .hd,.g-ask .hd{transform:rotate(calc(var(--s)*9deg))}
+.g-tilt .brow,.g-ask .brow{transform:translateY(-5px)}
+.g-ask .af{transform:rotate(calc(var(--s)*-55deg))}
+.g-tilt .af{transform:rotate(calc(var(--s)*-35deg))}.g-tilt .ab{transform:rotate(calc(var(--s)*35deg))}
+.g-open .af{animation:expA 1.3s ease-in-out infinite}.g-open .ab{animation:expB 1.3s ease-in-out infinite}
+.g-explain .af{animation:expA 1.1s ease-in-out infinite}
+@keyframes expA{0%,100%{transform:rotate(calc(var(--s)*-25deg))}50%{transform:rotate(calc(var(--s)*-62deg))}}
+@keyframes expB{0%,100%{transform:rotate(calc(var(--s)*40deg))}50%{transform:rotate(calc(var(--s)*20deg))}}
 .steam path{animation:steam 2.4s ease-in-out infinite}
 @keyframes steam{0%{opacity:0;transform:translateY(6px)}40%{opacity:.85}100%{opacity:0;transform:translateY(-10px)}}
 .cloud{animation:drift 14s ease-in-out infinite alternate}

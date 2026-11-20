@@ -68,8 +68,50 @@ export function charSvg(ch){
   const mouth='<path class="m0" d="M70 '+my+' Q80 '+(my+9)+' 90 '+my+'" fill="none"'+sw(3.5)+'/>'
     +'<g class="m1"><path d="M68 '+(my-2)+' Q80 '+(my-1)+' 92 '+(my-2)+' Q90 '+(my+16)+' 80 '+(my+16)+' Q70 '+(my+16)+' 68 '+(my-2)+' Z" fill="#8e2f2f"'+sw(3)+'/><path d="M73 '+(my+10)+' Q80 '+(my+5)+' 87 '+(my+10)+' Q84 '+(my+15)+' 80 '+(my+15)+' Q76 '+(my+15)+' 73 '+(my+10)+' Z" fill="#f2828a"/></g>';
   const cheeks='<ellipse cx="44" cy="114" rx="9" ry="6" fill="#ff8f8f" opacity=".45"/><ellipse cx="116" cy="114" rx="9" ry="6" fill="#ff8f8f" opacity=".45"/>';
+  const browL='<path class="brow" d="M'+(50+px)+' 74 Q'+(60+px)+' 68 '+(70+px)+' 74" fill="none"'+sw(3.5)+'/><path class="brow" d="M'+(90+px)+' 74 Q'+(100+px)+' 68 '+(110+px)+' 74" fill="none"'+sw(3.5)+'/>';
+  const half='<ellipse class="m2" cx="80" cy="'+(my+4)+'" rx="8" ry="5.5" fill="#8e2f2f"'+sw(3)+'/>';
   const phone=ch.phone?'<g><rect x="'+(look>0?126:6)+'" y="80" width="22" height="40" rx="5" fill="#2f3137"'+sw(3)+'/><circle cx="'+(look>0?137:17)+'" cy="124" r="13" fill="'+c.fur+'"'+sw(3)+'/></g>':"";
-  return '<g class="body">'+outfit(ch.o,ch.col||"#4a6fa5")+'<g class="head">'+head+face+muz+cheeks+eyes+brows+mouth+hat(ch.hat,ch.hcol||ch.col||"#d6453d")+phone+'</g></g>';
+  // arms hang from the shoulders; "af" is the arm on the side the character faces (toward the partner)
+  const sleeve={bowtie:"#2f3137",vest:"#ffffff",coat:"#ffffff"}[ch.o]||ch.col||"#4a6fa5";
+  const arm=(x,cls)=>'<g transform="translate('+x+' 170)"><g class="arm '+cls+'"><path d="M-12 0 L-11 50 Q0 58 11 50 L12 0 Q0 -8 -12 0 Z" fill="'+sleeve+'"'+sw(3.5)+'/>'
+    +(cls==="af"&&ch.item?'<g transform="translate(0 60) scale(1.5)"><g class="item">'+ch.item+'</g></g>':"")
+    +'<circle cx="0" cy="60" r="11" fill="'+c.fur+'"'+sw(3.5)+'/></g></g>';
+  const arms=ch.phone?"":arm(look>=0?124:36,"af")+arm(look>=0?36:124,"ab");
+  return '<g class="body"><g class="pose"><g class="breath">'+outfit(ch.o,ch.col||"#4a6fa5")
+    +'<g class="hd"><g class="head">'+head+face+muz+cheeks+eyes+browL+brows+mouth+half+hat(ch.hat,ch.hcol||ch.col||"#d6453d")+phone+'</g></g>'+arms+'</g></g></g>';
+}
+// The thing a character hands over, by place (drawn around the paw).
+const ITEMS={
+  cafe:'<path d="M-10 -26 L10 -26 L8 0 L-8 0 Z" fill="#fff"'+sw(3)+'/><rect x="-11" y="-30" width="22" height="6" rx="2" fill="#7a4a2e"'+sw(2)+'/><rect x="-9" y="-17" width="18" height="7" fill="#3fae6e"/>',
+  restaurant:'<rect x="-14" y="-34" width="28" height="36" rx="3" fill="#7a2e3a"'+sw(3)+'/><path d="M-7 -24 H7 M-7 -16 H5" stroke="#f2c94c" stroke-width="2.5"/>',
+  shop:'<path d="M-14 -24 H14 L12 4 H-12 Z" fill="#f2a65a"'+sw(3)+'/><path d="M-6 -24 Q0 -36 6 -24" fill="none"'+sw(3)+'/>',
+  hotel:'<rect x="-14" y="-22" width="28" height="18" rx="3" fill="#f2c94c"'+sw(3)+'/><rect x="-10" y="-17" width="10" height="4" fill="#3b2a21"/>',
+  airport:'<rect x="-11" y="-30" width="22" height="30" rx="3" fill="#2f5aa8"'+sw(3)+'/><circle cx="0" cy="-18" r="5" fill="none" stroke="#f2c94c" stroke-width="2"/>',
+  station:'<rect x="-16" y="-20" width="32" height="18" rx="2" fill="#fff"'+sw(3)+'/><path d="M-10 -14 H8 M-10 -8 H2" stroke="#d6453d" stroke-width="2.5"/>',
+  clinic:'<rect x="-13" y="-24" width="26" height="22" rx="3" fill="#fff"'+sw(3)+'/><path d="M0 -20 V-6 M-7 -13 H7" stroke="#3fae6e" stroke-width="4"/>',
+  bank:'<rect x="-16" y="-22" width="32" height="18" rx="2" fill="#a8d5a2"'+sw(3)+'/><circle cx="0" cy="-13" r="4" fill="none" stroke="#3b6b3a" stroke-width="2"/>',
+  office:'<rect x="-12" y="-32" width="24" height="32" rx="2" fill="#fff"'+sw(3)+'/><path d="M-6 -24 H6 M-6 -17 H6 M-6 -10 H2" stroke="#9fb4d6" stroke-width="2.5"/>',
+  meeting:'<rect x="-12" y="-32" width="24" height="32" rx="2" fill="#fff"'+sw(3)+'/><path d="M-6 -12 L-2 -18 L2 -14 L7 -24" fill="none" stroke="#2f6bff" stroke-width="2.5"/>',
+  home:'<rect x="-12" y="-28" width="24" height="26" rx="3" fill="#f7b9c4"'+sw(3)+'/><circle cx="0" cy="-15" r="6" fill="#fff"/>',
+  street:'<rect x="-15" y="-26" width="30" height="24" rx="2" fill="#fdf3d6"'+sw(3)+'/><path d="M-10 -8 L-2 -18 L4 -12 L10 -20" fill="none" stroke="#d6453d" stroke-width="2.5"/>',
+  park:'<rect x="-9" y="-30" width="18" height="30" rx="4" fill="#2f3137"'+sw(3)+'/><rect x="-6" y="-26" width="12" height="20" fill="#9fd6f2"/>',
+  taxi:'<rect x="-15" y="-20" width="30" height="18" rx="3" fill="#5b8cff"'+sw(3)+'/><rect x="-11" y="-16" width="8" height="5" fill="#f2c94c"/>'
+};
+
+/* ---------- which gesture fits a line ---------- */
+export function gestureFor(en,i){
+  const t=en.trim(),q=/\?\s*$/.test(t);
+  if(/^(hi|hello|hey|good (morning|afternoon|evening)|welcome|bye|goodbye|see you|nice to (meet|see))\b/i.test(t))return "wave";
+  if(/\b(here (you go|you are|is|are|'s)|this is (your|for you)|take this|your (order|tickets?|(room )?key|receipt|change|card|passport|coffee|drink|food|bag|medicine))\b|^okay, (one|two)\b/i.test(t))return "give";
+  if(/\b(thank|thanks|appreciate)\b/i.test(t))return "bow";
+  if(/^(sorry|i'?m (so |really )?sorry|excuse me|i apologi[sz]e|pardon)/i.test(t))return "bow";
+  if(/^(no\b|nope|not really|i don'?t|i can'?t|unfortunately|actually,? no)/i.test(t))return "no";
+  if(/^(yes|yeah|yep|sure|of course|okay|ok|great|perfect|sounds (good|great)|absolutely|definitely|exactly|right)\b/i.test(t))return "yes";
+  if(/\b(over there|this way|that way|turn (left|right)|go straight|on the (left|right)|next to|across from|this one|that one|look at)\b/i.test(t))return "point";
+  if(/^(i think|i guess|maybe|perhaps|probably|i'?m not sure|hmm|well,|let me (think|see)|it depends)/i.test(t))return "think";
+  if(/!/.test(t)&&!q)return "cheer";
+  if(q)return i%2?"tilt":"ask";
+  return i%2?"open":"explain";
 }
 
 /* ---------- places (400 x 300) ---------- */
@@ -174,16 +216,16 @@ export function sceneFor(l){
 /* ---------- the stage ---------- */
 function stage(sc){
   const P=PLACES[sc.place]||PLACES.park;
-  const them=Object.assign({look:1,phone:sc.phone},sc.them),me=Object.assign({look:-1,phone:sc.phone},ME);
+  const it=ITEMS[sc.place]||ITEMS.park,them=Object.assign({look:1,phone:sc.phone,item:it},sc.them),me=Object.assign({look:-1,phone:sc.phone,item:it},ME);
   if(sc.phone){
-    const half=(pl,ch,side,x)=>{const Q=PLACES[pl];return '<svg viewBox="100 0 200 300" class="half" preserveAspectRatio="xMidYMid slice"><rect width="400" height="300" fill="'+Q.wall+'"/>'+Q.back()+'<rect y="214" width="400" height="90" fill="'+Q.floor+'"/><g class="chr c-'+side+'" transform="translate('+x+' 70) scale(1.0)">'+charSvg(ch)+'</g>'+Q.front()+'</svg>';};
+    const half=(pl,ch,side,x)=>{const Q=PLACES[pl];return '<svg viewBox="100 0 200 300" class="half" preserveAspectRatio="xMidYMid slice"><rect width="400" height="300" fill="'+Q.wall+'"/>'+Q.back()+'<rect y="214" width="400" height="90" fill="'+Q.floor+'"/><g class="chr c-'+side+'" style="--s:'+(side==="them"?1:-1)+'" transform="translate('+x+' 70) scale(1.0)">'+charSvg(ch)+'</g>'+Q.front()+'</svg>';};
     return '<div class="stage phone">'+half(sc.place==="park"||sc.place==="street"?"home":sc.place,them,"them",120)+'<span class="ring" aria-hidden="true">📞</span>'+half("home",me,"me",120)+'</div>';
   }
   return '<div class="stage"><svg viewBox="0 0 400 300" preserveAspectRatio="xMidYMid slice"><g class="cam">'
     +'<rect width="400" height="300" fill="'+P.wall+'"/>'+P.back()+'<rect y="214" width="400" height="90" fill="'+P.floor+'"/>'
-    +'<g class="chr c-them" transform="translate(24 50)">'+charSvg(them)+'</g>'
-    +'<g class="chr c-me" transform="translate(216 50)">'+charSvg(me)+'</g>'
-    +P.front()+'</g></svg></div>';
+    +'<g class="chr c-them" style="--s:1" transform="translate(24 24)">'+charSvg(them)+'</g>'
+    +'<g class="chr c-me" style="--s:-1" transform="translate(216 24)">'+charSvg(me)+'</g>'
+    +'<g transform="translate(0 22)">'+P.front()+'</g></g></svg></div>';
 }
 export function sceneHtml(l){
   const sc=sceneFor(l);
@@ -220,13 +262,16 @@ export async function playScene(root,l,speak,alive){
     dots.children[i].className="on";
     en.textContent=x.en;ko.textContent=x.ko;key.hidden=!x.key;
     en.classList.remove("pop");void en.offsetWidth;en.classList.add("pop");
-    chr(x.who).forEach(c=>c.classList.add("talk"));
-    chr(x.who==="me"?"them":"me").forEach(c=>c.classList.add("nod"));
+    const g=gestureFor(x.en,i),G=["wave","give","bow","no","yes","point","think","cheer","tilt","ask","open","explain","take"].map(k=>"g-"+k);
+    root.querySelectorAll(".chr").forEach(c=>c.classList.remove(...G));
+    chr(x.who).forEach(c=>c.classList.add("talk","g-"+g));
+    chr(x.who==="me"?"them":"me").forEach(c=>c.classList.add(g==="give"?"g-take":"nod"));
     const t0=Date.now();
     await speak(x.en);
     const min=900+x.en.length*45;           // silent devices: still give time to read
     if(Date.now()-t0<min)await wait(min-(Date.now()-t0));
     root.querySelectorAll(".chr").forEach(c=>c.classList.remove("talk","nod"));
+    setTimeout(()=>root.querySelectorAll(".chr").forEach(c=>c.classList.remove("g-"+g,"g-take")),x.key?900:450);
     await wait(x.key?1100:650);
   }
   if(!alive())return false;
