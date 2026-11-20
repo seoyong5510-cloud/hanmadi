@@ -571,3 +571,7 @@ details.gram{margin:8px 0 4px;padding:10px 14px}
 @keyframes kb3{from{transform:scale(1.03)}to{transform:scale(1.12) translate(2%,-1%)}}
 @keyframes kb4{from{transform:scale(1.1) translate(-2%,1%)}to{transform:scale(1.02)}}
 .pics~.tag{display:none}
+
+/* moving clips: no extra camera move, the clip itself moves */
+.vids .pic{background:#231c18}
+.vids .pic.on{animation:none}

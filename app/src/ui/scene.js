@@ -239,15 +239,17 @@ function stage(sc){
     +'<g transform="translate(0 22)">'+P.front()+'</g>'+bubble("them",186,40)+bubble("me",214,40)+'</g></svg></div>';
 }
 // Lessons whose illustrated pictures exist (app/scenes/<lesson>_<line>.webp); filled from scenes.json.
-export const PICS=new Set();
+export const PICS=new Set(),VIDS=new Set();
 export async function loadPics(){
   try{(await (await fetch("scenes.json")).json()).forEach(id=>PICS.add(id));}catch(e){}
+  try{(await (await fetch("clips.json")).json()).forEach(id=>VIDS.add(id));}catch(e){}
 }
 export function sceneHtml(l){
   const sc=sceneFor(l);
   return '<div class="scn" data-place="'+sc.place+'">'
     +'<div class="scn-top"><p class="scn-k">이럴 때 써요</p><p class="scn-t">'+esc(l.sub)+'</p></div>'
-    +'<div class="stw">'+(PICS.has(l.id)?'<div class="stage pics"><img class="pic on" alt="" src="scenes/'+l.id+'_0.webp"><img class="pic" alt=""></div>':stage(sc))
+    +'<div class="stw">'+(VIDS.has(l.id)?'<div class="stage pics vids"><video class="pic on" muted playsinline preload="auto" poster="scenes/'+l.id+'_0.webp" src="clips/'+l.id+'_0.webm"></video><video class="pic" muted playsinline preload="auto"></video></div>'
+     :PICS.has(l.id)?'<div class="stage pics"><img class="pic on" alt="" src="scenes/'+l.id+'_0.webp"><img class="pic" alt=""></div>':stage(sc))
     +'<span class="tag t-a">'+esc(sc.label)+'</span><span class="tag t-b">나</span></div>'
     +'<div class="scn-sub" aria-live="polite"><p class="scn-key" hidden>⭐ 오늘 배울 문장</p><p class="scn-en" lang="en">&nbsp;</p><p class="scn-ko">&nbsp;</p></div>'
     +'<ol class="scn-dots" aria-hidden="true"></ol></div>';
@@ -263,7 +265,25 @@ export function sceneLines(l){
 }
 // Puts one line on stage: subtitle-independent pose, face, item in hand or thought bubble. Returns the action.
 const KB=["kb1","kb2","kb3","kb4"];
+function showClip(root,l,i){
+  const vs=root.querySelectorAll("video.pic");
+  const cur=root.querySelector("video.pic.on");
+  let nx=cur;
+  if(!(i===0&&cur&&(cur.getAttribute("src")||"").endsWith("_0.webm"))){
+    nx=cur===vs[0]?vs[1]:vs[0];
+    nx.poster="scenes/"+l.id+"_"+i+".webp";nx.src="clips/"+l.id+"_"+i+".webm";
+  }
+  return new Promise(res=>{
+    let done=false;const go=()=>{if(done)return;done=true;
+      nx.classList.add("on");if(cur&&cur!==nx){cur.classList.remove("on");setTimeout(()=>cur.pause(),700);}
+      res();};
+    try{nx.currentTime=0;}catch(e){}
+    const p=nx.play();if(p&&p.catch)p.catch(()=>{});
+    if(nx.readyState>=2)go();else{nx.onloadeddata=go;nx.onerror=go;setTimeout(go,1500);}
+  });
+}
 function showPic(root,l,i){
+  if(root.querySelector("video.pic"))return showClip(root,l,i);
   const imgs=root.querySelectorAll(".pic");if(!imgs.length)return Promise.resolve();
   const cur=root.querySelector(".pic.on"),nx=cur===imgs[0]?imgs[1]:imgs[0];
   if(i===0&&cur&&cur.getAttribute("src").endsWith("_0.webp")){cur.className="pic on "+KB[0];return Promise.resolve();}
@@ -306,7 +326,7 @@ export async function playScene(root,l,speak,alive,preload){
     dots.children[i].className="on";
     en.textContent=x.en;ko.textContent=x.ko;key.hidden=!x.key;
     en.classList.remove("pop");void en.offsetWidth;en.classList.add("pop");
-    if(root.querySelector(".pics")){await showPic(root,l,i);if(lines[i+1]){const im=new Image();im.src="scenes/"+l.id+"_"+(i+1)+".webp";}}
+    if(root.querySelector(".pics")){await showPic(root,l,i);if(lines[i+1]){if(VIDS.has(l.id))fetch("clips/"+l.id+"_"+(i+1)+".webm").catch(()=>{});else{const im=new Image();im.src="scenes/"+l.id+"_"+(i+1)+".webp";}}}
     const g=setLine(root,x,i);
     const t0=Date.now();
     if(lines[i+1])preload(lines[i+1].en,lines[i+1].who);
