@@ -13,6 +13,7 @@ import {llmReady,speechReady,call} from "../ai/relay.js";
 import {I,art} from "./icons.js";
 import {app,chrome,$,$$,ui,register,show,open,enter,onLeave,fit} from "./nav.js";
 import {openPron} from "./pronui.js";
+import {sceneHtml,playScene} from "./scene.js";
 
 let S=null;
 const M=()=>(LV[P.level]||LV.a1).mode;
@@ -28,6 +29,8 @@ function startLesson(id){
   const picQ=wd=>({t:"pic",wd,ans:wd.w,fbA:wd.e+" "+wd.w,fbB:wd.ko,spk:wd.w,
     opts:shuffle([wd.w].concat(shuffle(l.words.filter(x=>x!==wd)).slice(0,2).map(x=>x.w)))});
   // the teacher explains first, in three picture cards: today's goal, the key point, the sentences
+  // first, a short cartoon of the situation: the learner sees when today's sentences are used
+  q.push({t:"scene",l});
   q.push({t:"intro",l,s:1});q.push({t:"intro",l,s:2});q.push({t:"intro",l,s:3});
   // Each new sentence: see and repeat, then say it again at once with half the words hidden.
   l.ph.forEach(p=>{q.push({t:"learn",p,en:p.en});q.push({t:"fade",p,en:p.en});});
@@ -104,7 +107,9 @@ function showEx(){
   const ex=S.q[S.i],p=ex.p;
   S.first=true;S.hint=false;S.fails=0;
   let m="",auto="";
-  if(ex.t==="intro"){
+  if(ex.t==="scene"){
+    m=sceneHtml(ex.l)+'<button type="button" class="scn-replay" id="replay" hidden>'+I.spk+'다시 보기</button>';
+  }else if(ex.t==="intro"){
     const l=ex.l,T=(n,cls)=>'<img class="tch '+(cls||"")+'" src="img/t'+n+'.webp" alt="선생님" width="540" height="540">';
     const voice=ex.s===1?"안녕하세요! 오늘은 "+l.title+" 수업이에요. "+l.goal+" 먼저 핵심부터 짚고 갈게요."
       :ex.s===2?"오늘의 핵심이에요. "+l.grammar.note
@@ -177,6 +182,15 @@ function showEx(){
     $("#nx").addEventListener("click",()=>{stopSpeak();next();});
     $("#hearplay").addEventListener("click",()=>{stopSpeak();playAll();});
     playAll();
+  }
+  else if(ex.t==="scene"){
+    const my=S.i,alive=()=>S&&S.i===my&&ui.busy==="session";
+    $("#dock").innerHTML='<button type="button" class="cta" id="nx">수업 시작하기</button>';
+    $("#nx").addEventListener("click",()=>{stopSpeak();next();});
+    const rb=$("#replay");
+    const run=async()=>{rb.hidden=true;const ok=await playScene(app,ex.l,canSpeak()?t=>speak(t):()=>Promise.resolve(),alive);if(ok&&alive())rb.hidden=false;fit();};
+    rb.addEventListener("click",()=>{stopSpeak();run();});
+    run();
   }
   else if(ex.t==="spell")dockSpell(ex);
   else if(ex.t==="build")dockBuild(ex);
