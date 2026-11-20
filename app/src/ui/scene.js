@@ -238,11 +238,16 @@ function stage(sc){
     +'<g class="chr c-me" style="--s:-1" transform="translate(216 24)">'+charSvg(me)+'</g>'
     +'<g transform="translate(0 22)">'+P.front()+'</g>'+bubble("them",186,40)+bubble("me",214,40)+'</g></svg></div>';
 }
+// Lessons whose illustrated pictures exist (app/scenes/<lesson>_<line>.webp); filled from scenes.json.
+export const PICS=new Set();
+export async function loadPics(){
+  try{(await (await fetch("scenes.json")).json()).forEach(id=>PICS.add(id));}catch(e){}
+}
 export function sceneHtml(l){
   const sc=sceneFor(l);
   return '<div class="scn" data-place="'+sc.place+'">'
     +'<div class="scn-top"><p class="scn-k">이럴 때 써요</p><p class="scn-t">'+esc(l.sub)+'</p></div>'
-    +'<div class="stw">'+stage(sc)
+    +'<div class="stw">'+(PICS.has(l.id)?'<div class="stage pics"><img class="pic on" alt="" src="scenes/'+l.id+'_0.webp"><img class="pic" alt=""></div>':stage(sc))
     +'<span class="tag t-a">'+esc(sc.label)+'</span><span class="tag t-b">나</span></div>'
     +'<div class="scn-sub" aria-live="polite"><p class="scn-key" hidden>⭐ 오늘 배울 문장</p><p class="scn-en" lang="en">&nbsp;</p><p class="scn-ko">&nbsp;</p></div>'
     +'<ol class="scn-dots" aria-hidden="true"></ol></div>';
@@ -257,8 +262,20 @@ export function sceneLines(l){
   return out;
 }
 // Puts one line on stage: subtitle-independent pose, face, item in hand or thought bubble. Returns the action.
+const KB=["kb1","kb2","kb3","kb4"];
+function showPic(root,l,i){
+  const imgs=root.querySelectorAll(".pic");if(!imgs.length)return Promise.resolve();
+  const cur=root.querySelector(".pic.on"),nx=cur===imgs[0]?imgs[1]:imgs[0];
+  if(i===0&&cur&&cur.getAttribute("src").endsWith("_0.webp")){cur.className="pic on "+KB[0];return Promise.resolve();}
+  return new Promise(res=>{
+    const done=()=>{nx.className="pic on "+KB[i%4];if(cur&&cur!==nx)cur.classList.remove("on");res();};
+    nx.onload=done;nx.onerror=done;nx.src="scenes/"+l.id+"_"+i+".webp";
+    setTimeout(res,2500);
+  });
+}
 export function setLine(root,x,i){
   const scn=root.querySelector(".scn"),chr=w=>root.querySelectorAll(".chr.c-"+w);
+  if(!root.querySelector(".chr"))return "";
   const pl=planLine(x.en,gestureFor(x.en,i)),g=pl.act,other=x.who==="me"?"them":"me";
   root.querySelectorAll(".chr").forEach(c=>{c.className.baseVal=c.className.baseVal.split(" ").filter(k=>!/^(g|f)-/.test(k)).join(" ");c.querySelectorAll(".item").forEach(e=>e.innerHTML="");});
   root.querySelectorAll(".bub").forEach(b=>b.classList.remove("on"));
@@ -289,6 +306,7 @@ export async function playScene(root,l,speak,alive,preload){
     dots.children[i].className="on";
     en.textContent=x.en;ko.textContent=x.ko;key.hidden=!x.key;
     en.classList.remove("pop");void en.offsetWidth;en.classList.add("pop");
+    if(root.querySelector(".pics")){await showPic(root,l,i);if(lines[i+1]){const im=new Image();im.src="scenes/"+l.id+"_"+(i+1)+".webp";}}
     const g=setLine(root,x,i);
     const t0=Date.now();
     if(lines[i+1])preload(lines[i+1].en,lines[i+1].who);

@@ -561,3 +561,13 @@ details.gram{margin:8px 0 4px;padding:10px 14px}
 .g-shake .af{animation:shk .3s ease-in-out infinite alternate}
 @keyframes shk{from{transform:rotate(calc(var(--s)*-66deg))}to{transform:rotate(calc(var(--s)*-78deg))}}
 @media (prefers-reduced-motion:reduce){.cam,.chr *,.cloud,.plane,.steam path{animation:none !important;transition:none !important}}
+/* illustrated scene pictures (one per line) */
+.stage.pics{position:relative;background:#231c18}
+.pic{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .7s ease}
+.pic.on{opacity:1}
+.pic.kb1{animation:kb1 9s ease-out forwards}.pic.kb2{animation:kb2 9s ease-out forwards}.pic.kb3{animation:kb3 9s ease-out forwards}.pic.kb4{animation:kb4 9s ease-out forwards}
+@keyframes kb1{from{transform:scale(1.02)}to{transform:scale(1.12) translate(-2%,-1%)}}
+@keyframes kb2{from{transform:scale(1.12) translate(2%,0)}to{transform:scale(1.03)}}
+@keyframes kb3{from{transform:scale(1.03)}to{transform:scale(1.12) translate(2%,-1%)}}
+@keyframes kb4{from{transform:scale(1.1) translate(-2%,1%)}to{transform:scale(1.02)}}
+.pics~.tag{display:none}

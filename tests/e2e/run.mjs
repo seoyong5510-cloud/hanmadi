@@ -188,7 +188,7 @@ try{
 
   /* 3. a full lesson at A1 with a wrong first try everywhere */
   await page.evaluate(()=>window.__t.show("lessons"));await page.click('[data-lesson="l2"]');
-  ok("lesson opens with the situation cartoon",!!(await page.$(".scn .chr.c-me"))&&!!(await page.$(".scn .chr.c-them"))&&(await txt(page,".scn-t")).length>0);
+  ok("lesson opens with the situation pictures",!!(await page.$(".scn .pics img.pic.on"))&&(await txt(page,".scn-t")).length>0);
   await page.waitForFunction(()=>document.querySelector(".scn-en").textContent.trim().length>1,null,{timeout:8000});
   ok("cartoon plays the dialogue with English and Korean subtitles",(await txt(page,".scn-ko")).trim().length>1);
   await page.screenshot({path:SHOTS+"/05-lesson-scene.png"});

@@ -7,12 +7,13 @@ import {sfx} from "./speech/sfx.js";
 import {app,chrome,$,ui,show} from "./ui/nav.js";
 import "./ui/home.js";
 import "./ui/session.js";
+import {loadPics} from "./ui/scene.js";
 import "./ui/tutor.js";
 import "./ui/words.js";
 
 async function boot(){
   load();
-  try{await loadContent();}
+  try{await Promise.all([loadContent(),loadPics()]);}
   catch(e){
     app.innerHTML='<div class="fin"><h1>수업 내용을 불러오지 못했어요</h1><p class="lead">인터넷 연결을 확인하고 다시 열어 주세요.</p></div>';
     chrome.innerHTML='<div class="dock fixed"><button type="button" class="cta" id="again">다시 시도</button></div>';
